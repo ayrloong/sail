@@ -3,7 +3,6 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.Extensions.Options;
 using Sail.Core.Options;
-using Yarp.ReverseProxy.Configuration;
 
 namespace Sail.Core.Certificates;
 

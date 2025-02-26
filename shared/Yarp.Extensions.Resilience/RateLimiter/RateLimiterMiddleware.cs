@@ -19,7 +19,7 @@ public class RateLimiterMiddleware(RequestDelegate next)
             return;
         }
 
-        var policyName = enableRateLimitingAttribute?.PolicyName;
+        var policyName = enableRateLimitingAttribute.PolicyName;
         
         var policy = policyProvider.GetPolicy(policyName);
 
