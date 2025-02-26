@@ -24,12 +24,14 @@ public class ProxyDiscoveryService : BackgroundHostedService
         IHostApplicationLifetime hostApplicationLifetime,
         IResourceInformer<Route> routeInformer,
         IResourceInformer<Cluster> clusterInformer,
+        IResourceInformer<Certificate> certificateInformer,
         ILogger<ProxyDiscoveryService> logger) : base(hostApplicationLifetime, logger)
     {
-        var registrations = new List<IResourceInformerRegistration>()
+        var registrations = new List<IResourceInformerRegistration>
         {
             routeInformer.Register(Notification),
             clusterInformer.Register(Notification),
+            certificateInformer.Register(Notification)
         };
 
         _cache = cache;
@@ -39,6 +41,7 @@ public class ProxyDiscoveryService : BackgroundHostedService
 
         routeInformer.StartWatching();
         clusterInformer.StartWatching();
+        certificateInformer.StartWatching();
         _queue = new ProcessingRateLimitedQueue<QueueItem>(perSecond: 0.5, burst: 1);
         _changeQueueItem = new QueueItem("");
     }
@@ -86,6 +89,12 @@ public class ProxyDiscoveryService : BackgroundHostedService
     private void Notification(ResourceEvent<Cluster> resource)
     {
         _cache.UpdateCluster(resource);
+        NotificationChanged();
+    }
+
+    private void Notification(ResourceEvent<Certificate> resource)
+    {
+        _cache.UpdateCertificate(resource);
         NotificationChanged();
     }
 

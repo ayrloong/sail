@@ -22,4 +22,7 @@
     <Project Path="src\Sail.Storage.MongoDB\Sail.Storage.MongoDB.csproj" Type="Classic C#" />
     <Project Path="src\Sail\Sail.csproj" Type="Classic C#" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\Sail.FunctionalTests\Sail.FunctionalTests.csproj" Type="Classic C#" />
+  </Folder>
 </Solution>

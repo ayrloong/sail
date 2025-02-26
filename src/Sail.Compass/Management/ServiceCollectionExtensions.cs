@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Sail.Api.V1;
 using Sail.Compass.Caching;
 using Sail.Compass.Hosting;
@@ -21,7 +22,7 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<ProxyDiscoveryService>();
         services.RegisterResourceInformer<Route, V1RouteResourceInformer>();
         services.RegisterResourceInformer<Cluster, V1ClusterResourceInformer>();
-
+     
         return services;
     }
     private static IServiceCollection RegisterResourceInformer<TResource, TService>(this IServiceCollection services)
