@@ -75,6 +75,7 @@ public class ClusterGrpcService(SailContext dbContext, IClusterStore clusterStor
         return new ClusterResponse
         {
             ClusterId = cluster.Id.ToString(),
+            ServiceName = cluster.ServiceName,
             LoadBalancingPolicy = cluster.LoadBalancingPolicy,
             Destinations =
             {

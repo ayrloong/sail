@@ -1,35 +1,38 @@
 using Sail.Api.V1;
 using Sail.Core.Certificates;
+using Yarp.Extensions.Resilience.ServiceDiscovery;
 using Yarp.ReverseProxy.Configuration;
 using RouteMatch = Yarp.ReverseProxy.Configuration.RouteMatch;
 
 namespace Sail.Compass.Converters;
 
-internal static class Parser
+internal class Parser(IServiceDiscoveryDestinationResolver resolver)
 {
-    internal static IReadOnlyList<CertificateConfig> ConvertCertificates(IEnumerable<Certificate> certificates)
+    IReadOnlyList<CertificateConfig> ConvertCertificates(IEnumerable<Certificate> certificates)
     {
         throw new NotImplementedException();
     }
 
-    internal static void ConvertFromDataSource(DataSourceContext dataSourceContext, YarpConfigContext configContext)
+    public async ValueTask ConvertFromDataSourceAsync(DataSourceContext dataSourceContext,
+        YarpConfigContext configContext, CancellationToken cancellationToken)
     {
         foreach (var route in dataSourceContext.Routes)
         {
-            HandleRoute(configContext, route);
+            await HandleRouteAsyncCore(configContext, route, cancellationToken);
         }
 
         foreach (var cluster in dataSourceContext.Clusters)
         {
-            HandleCluster(configContext, cluster);
+            await HandleClusterAsyncCore(configContext, cluster, cancellationToken);
         }
     }
 
-    private static void HandleCluster(YarpConfigContext configContext, Cluster cluster)
+    async ValueTask HandleClusterAsyncCore(YarpConfigContext configContext, Cluster cluster,
+        CancellationToken cancellationToken)
     {
         var clusters = configContext.Clusters;
 
-        clusters.Add(new ClusterConfig
+        var clusterConfig = new ClusterConfig
         {
             ClusterId = cluster.ClusterId,
             LoadBalancingPolicy = cluster.LoadBalancingPolicy,
@@ -39,10 +42,18 @@ internal static class Parser
                 Health = x.Health,
                 Address = x.Address
             })
-        });
+        };
+
+        if (cluster.Destinations is { Count: > 0 })
+        {
+            var resolvedDestinations = await resolver.ResolveDestinationsAsync(cluster.ServiceName, cancellationToken);
+            clusterConfig = clusterConfig with { Destinations = resolvedDestinations.Destinations };
+        }
+
+        clusters.Add(clusterConfig);
     }
 
-    private static void HandleRoute(YarpConfigContext configContext, Route route)
+    ValueTask HandleRouteAsyncCore(YarpConfigContext configContext, Route route, CancellationToken cancellationToken)
     {
         var routes = configContext.Routes;
 
@@ -66,5 +77,7 @@ internal static class Parser
             MaxRequestBodySize = route.MaxRequestBodySize,
             Order = route.Order
         });
+
+        return ValueTask.CompletedTask;
     }
 }
