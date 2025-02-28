@@ -57,7 +57,7 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
     {
         var routes = configContext.Routes;
 
-        routes.Add(new RouteConfig
+        var routeConfig = new RouteConfig
         {
             RouteId = route.RouteId,
             ClusterId = route.ClusterId,
@@ -66,18 +66,31 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
                 Hosts = route.Match.Hosts,
                 Path = route.Match.Path,
                 Methods = route.Match.Methods,
-                // Headers = route.Match.Headers.Select(x => x.ToRouteHeader()).ToList(),
-                // QueryParameters = route.Match.QueryParameters.Select(x => x.ToRouteQueryParameter()).ToList()
+                Headers = route.Match.Headers.Select(x => new RouteHeader
+                {
+                    Name = x.Name,
+                    Values = x.Values,
+                    Mode = (HeaderMatchMode)x.Mode,
+                    IsCaseSensitive = x.IsCaseSensitive
+                }).ToList(),
+                QueryParameters = route.Match.QueryParameters.Select(x => new RouteQueryParameter
+                {
+                    Name = x.Name,
+                    Values = x.Values,
+                    Mode = (QueryParameterMatchMode)x.Mode,
+                    IsCaseSensitive = x.IsCaseSensitive
+                }).ToList()
             },
             AuthorizationPolicy = route.AuthorizationPolicy,
             RateLimiterPolicy = route.RateLimiterPolicy,
             TimeoutPolicy = route.TimeoutPolicy,
             CorsPolicy = route.CorsPolicy,
-            //Timeout = TimeSpan.FromSeconds(route.Timeout),
+            Timeout = TimeSpan.FromSeconds(route.Timeout),
             MaxRequestBodySize = route.MaxRequestBodySize,
             Order = route.Order
-        });
+        };
 
+        routes.Add(routeConfig);
         return ValueTask.CompletedTask;
     }
 }

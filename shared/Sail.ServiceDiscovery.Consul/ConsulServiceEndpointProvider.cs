@@ -11,7 +11,7 @@ internal sealed partial class ConsulServiceEndpointProvider(
     string hostName,
     IOptionsMonitor<ConsulServiceEndpointProviderOptions> options,
     ILogger<ConsulServiceEndpointProvider> logger,
-    ConsulClient client,
+    IConsulClient client,
     TimeProvider timeProvider) :
     ConsulServiceEndpointProviderBase(query, logger, timeProvider), IHostNameFeature
 {

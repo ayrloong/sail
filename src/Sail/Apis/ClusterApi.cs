@@ -58,5 +58,10 @@ public static class ClusterApi
     }
 }
 
-public record ClusterRequest(string Name, string LoadBalancingPolicy, List<DestinationRequest> Destinations);
+public record ClusterRequest(
+    string Name,
+    string ServiceName,
+    string LoadBalancingPolicy,
+    List<DestinationRequest> Destinations);
+
 public record DestinationRequest(string Host,string Address,string Health);

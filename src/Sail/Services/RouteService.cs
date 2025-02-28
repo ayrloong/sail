@@ -23,7 +23,29 @@ public class RouteService(SailContext context) : IRouteService
         var route = new Route
         {
             Name = request.Name,
+            ClusterId = request.ClusterId,
+            Match = new RouteMatch
+            {
+                Path = request.Match.Path,
+                Hosts = request.Match.Hosts,
+                Methods = request.Match.Methods,
+                QueryParameters = request.Match.ParameterRequests.Select(x=>new RouteQueryParameter
+                {
+                    Name = x.Name,
+                    Values = x.Values,
+                    Mode = x.Mode,
+                    IsCaseSensitive = x.IsCaseSensitive
+                }).ToList(),
+                Headers = request.Match.RouteHeaders.Select(x=>new RouteHeader
+                {
+                    Name = x.Name,
+                    Values = x.Values,
+                    Mode = x.Mode,
+                    IsCaseSensitive = x.IsCaseSensitive
+                }).ToList()
+            }
         };
+        
         await context.Routes.InsertOneAsync(route, cancellationToken: cancellationToken);
         return Result.Created;
     }
@@ -54,6 +76,7 @@ public class RouteService(SailContext context) : IRouteService
         return new RouteVm
         {
             Id = route.Id,
+            ClusterId = route.ClusterId,
             Name = route.Name,
             Match = new RouteMatchVm
             {
@@ -92,7 +115,7 @@ public class RouteService(SailContext context) : IRouteService
 public record RouteVm
 {
     public Guid Id { get; init; }
-    public Guid ClusterId { get; init; }
+    public Guid? ClusterId { get; init; }
     public string Name { get; init; }
     public RouteMatchVm Match { get; init; }
     public int Order { get; init; }

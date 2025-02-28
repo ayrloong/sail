@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Http.HttpResults;
+using Sail.Core.Entities;
 using Sail.Extensions;
 using Sail.Services;
+using RouteMatch = Sail.Api.V1.RouteMatch;
 
 namespace Sail.Apis;
 
@@ -59,4 +61,18 @@ public static class RouteApi
 }
 
 public record RouteRequest(Guid ClusterId, string Name, RouteMatchRequest Match);
-public record RouteMatchRequest(string Path,List<string> Methods, List<string> Hosts);
+
+public record RouteMatchRequest(
+    string Path,
+    List<string> Methods,
+    List<string> Hosts,
+    List<QueryParameterRequest> ParameterRequests,
+    List<RouteHeaderRequest> RouteHeaders);
+
+public record QueryParameterRequest(
+    string Name,
+    List<string> Values,
+    QueryParameterMatchMode Mode,
+    bool IsCaseSensitive);
+
+public record RouteHeaderRequest(string Name, List<string> Values, HeaderMatchMode Mode, bool IsCaseSensitive);

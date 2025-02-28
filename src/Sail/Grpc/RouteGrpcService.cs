@@ -78,8 +78,14 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
         return new RouteResponse
         {
             RouteId = route.Id.ToString(),
-            Match = new RouteMatch(),
+            Match = new RouteMatch
+            {
+                Path = match.Path,
+                Methods = { match.Methods },
+                Hosts = { match.Hosts }
+            },
             Order = route.Order,
+            ClusterId = route.ClusterId?.ToString(),
             CorsPolicy = route.CorsPolicy,
             TimeoutPolicy = route.TimeoutPolicy,
             AuthorizationPolicy = route.AuthorizationPolicy,
