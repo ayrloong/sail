@@ -40,7 +40,7 @@
     <PackageVersion Include="ErrorOr" Version="2.0.1" />
     <PackageVersion Include="FluentValidation" Version="11.10.0" />
     <PackageVersion Include="Yarp.ReverseProxy" Version="2.1.0" />
-    <PackageVersion Include="Consul" Version="1.7.14.5" />
+    <PackageVersion Include="Consul.AspNetCore" Version="1.7.14.5" />
     <PackageVersion Include="System.Reactive" Version="6.0.1"/>
   </ItemGroup>
 </Project>

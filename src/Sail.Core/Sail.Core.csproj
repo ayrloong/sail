@@ -11,4 +11,8 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
         <PackageReference Include="Microsoft.Extensions.Options" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\shared\Yarp.Extensions.Resilience\Yarp.Extensions.Resilience.csproj" />
+    </ItemGroup>
 </Project>

@@ -9,7 +9,7 @@ internal sealed  class ConsulServiceEndpointProviderFactory(
     IOptionsMonitor<ConsulServiceEndpointProviderOptions> options,
     ILogger<ConsulServiceEndpointProvider> logger,
     TimeProvider timeProvider,
-    ConsulClient client) : IServiceEndpointProviderFactory
+    IConsulClient client) : IServiceEndpointProviderFactory
 {
     public bool TryCreateProvider(ServiceEndpointQuery query, out IServiceEndpointProvider? provider)
     {
