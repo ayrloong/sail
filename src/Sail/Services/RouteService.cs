@@ -27,22 +27,22 @@ public class RouteService(SailContext context) : IRouteService
             Match = new RouteMatch
             {
                 Path = request.Match.Path,
-                Hosts = request.Match.Hosts,
-                Methods = request.Match.Methods,
-                QueryParameters = request.Match.ParameterRequests.Select(x=>new RouteQueryParameter
+                Hosts = request.Match.Hosts ?? [],
+                Methods = request.Match.Methods ?? [],
+                QueryParameters = request.Match.ParameterRequests?.Select(x => new RouteQueryParameter
                 {
                     Name = x.Name,
                     Values = x.Values,
                     Mode = x.Mode,
                     IsCaseSensitive = x.IsCaseSensitive
-                }).ToList(),
-                Headers = request.Match.RouteHeaders.Select(x=>new RouteHeader
+                }).ToList() ?? [],
+                Headers = request.Match.RouteHeaders?.Select(x => new RouteHeader
                 {
                     Name = x.Name,
                     Values = x.Values,
                     Mode = x.Mode,
                     IsCaseSensitive = x.IsCaseSensitive
-                }).ToList()
+                }).ToList() ?? []
             }
         };
         

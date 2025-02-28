@@ -53,6 +53,8 @@ public class SailContext
                 classMap.AutoMap();
                 classMap.MapIdMember(x => x.Id)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
+                classMap.MapMember(x => x.ClusterId)
+                    .SetSerializer(new NullableSerializer<Guid>(new GuidSerializer(GuidRepresentation.Standard)));
             });
         }
 

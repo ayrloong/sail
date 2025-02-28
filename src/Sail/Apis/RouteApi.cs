@@ -64,10 +64,10 @@ public record RouteRequest(Guid ClusterId, string Name, RouteMatchRequest Match)
 
 public record RouteMatchRequest(
     string Path,
-    List<string> Methods,
-    List<string> Hosts,
-    List<QueryParameterRequest> ParameterRequests,
-    List<RouteHeaderRequest> RouteHeaders);
+    List<string>? Methods,
+    List<string>? Hosts,
+    List<QueryParameterRequest>? ParameterRequests,
+    List<RouteHeaderRequest>? RouteHeaders);
 
 public record QueryParameterRequest(
     string Name,

@@ -80,9 +80,7 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
             RouteId = route.Id.ToString(),
             Match = new RouteMatch
             {
-                Path = match.Path,
-                Methods = { match.Methods },
-                Hosts = { match.Hosts }
+                Path = match.Path
             },
             Order = route.Order,
             ClusterId = route.ClusterId?.ToString(),

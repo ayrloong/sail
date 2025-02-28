@@ -61,6 +61,7 @@ public static class ClusterApi
 public record ClusterRequest(
     string Name,
     string ServiceName,
+    string ServiceDiscoveryType,
     string LoadBalancingPolicy,
     List<DestinationRequest> Destinations);
 
