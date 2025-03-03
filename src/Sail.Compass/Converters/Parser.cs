@@ -44,7 +44,7 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
             })
         };
 
-        if (cluster.Destinations is { Count: > 0 })
+        if (!string.IsNullOrEmpty(cluster.ServiceName))
         {
             var resolvedDestinations = await resolver.ResolveDestinationsAsync(cluster.ServiceName, cancellationToken);
             clusterConfig = clusterConfig with { Destinations = resolvedDestinations.Destinations };
@@ -85,7 +85,7 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
             RateLimiterPolicy = route.RateLimiterPolicy,
             TimeoutPolicy = route.TimeoutPolicy,
             CorsPolicy = route.CorsPolicy,
-            Timeout = TimeSpan.FromSeconds(route.Timeout),
+         //   Timeout = TimeSpan.FromSeconds(route.Timeout),
             MaxRequestBodySize = route.MaxRequestBodySize,
             Order = route.Order
         };

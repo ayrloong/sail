@@ -2,6 +2,7 @@ syntax = "proto3";
 import "cluster.proto";
 import "common.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 package sail.api.v1;
 
@@ -24,10 +25,10 @@ message Route {
   string cluster_id = 2;
   RouteMatch match = 3;
   int32 order = 4;
-  string authorization_policy = 5;
-  string rate_limiter_policy = 6;
-  string cors_policy = 7;
-  string timeout_policy = 8;
+  google.protobuf.StringValue authorization_policy = 5;
+  google.protobuf.StringValue rate_limiter_policy = 6;
+  google.protobuf.StringValue cors_policy = 7;
+  google.protobuf.StringValue timeout_policy = 8;
   int32 timeout = 9;
   int64 max_request_body_size = 10;
 }

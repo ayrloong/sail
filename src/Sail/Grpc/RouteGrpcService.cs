@@ -85,6 +85,7 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
             Order = route.Order,
             ClusterId = route.ClusterId?.ToString(),
             CorsPolicy = route.CorsPolicy,
+            Timeout = -1,
             TimeoutPolicy = route.TimeoutPolicy,
             AuthorizationPolicy = route.AuthorizationPolicy,
             MaxRequestBodySize = route.MaxRequestBodySize ?? -1,
