@@ -44,7 +44,7 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
             })
         };
 
-        if (!string.IsNullOrEmpty(cluster.ServiceName))
+        if (cluster.EnabledServiceDiscovery)
         {
             var resolvedDestinations = await resolver.ResolveDestinationsAsync(cluster.ServiceName, cancellationToken);
             clusterConfig = clusterConfig with { Destinations = resolvedDestinations.Destinations };

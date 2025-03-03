@@ -76,6 +76,7 @@ public class ClusterGrpcService(SailContext dbContext, IClusterStore clusterStor
         {
             ClusterId = cluster.Id.ToString(),
             ServiceName = cluster.ServiceName,
+            EnabledServiceDiscovery = IsServiceDiscoveryEnabled(cluster.ServiceName, cluster.ServiceDiscoveryType),
             LoadBalancingPolicy = cluster.LoadBalancingPolicy,
             Destinations =
             {
@@ -87,5 +88,11 @@ public class ClusterGrpcService(SailContext dbContext, IClusterStore clusterStor
                 })
             }
         };
+    }
+
+    private static bool IsServiceDiscoveryEnabled(string? serviceName, string? serviceDiscoveryType)
+    {
+        return !string.IsNullOrEmpty(serviceName) &&
+               !string.IsNullOrEmpty(serviceDiscoveryType);
     }
 }

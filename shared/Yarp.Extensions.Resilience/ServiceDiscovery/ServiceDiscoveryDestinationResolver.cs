@@ -18,9 +18,10 @@ public class ServiceDiscoveryDestinationResolver(ServiceEndpointResolver resolve
         foreach (var endpoint in result.Endpoints)
         {
             var addressString = endpoint.ToString()!;
+            
             var config = new DestinationConfig
             {
-                Address = addressString,
+                Address = $"{addressString}",
             };
 
             var name = $"{serviceName}[{addressString}]";
@@ -29,4 +30,6 @@ public class ServiceDiscoveryDestinationResolver(ServiceEndpointResolver resolve
 
         return new ResolvedDestinationCollection(destinations, new CompositeChangeToken(new List<IChangeToken>()));
     }
+    
+    
 }
