@@ -3,6 +3,7 @@
     <Project Path="samples\ApiSample\ApiSample.csproj" Type="Classic C#" />
     <Project Path="samples\SampleServer\SampleServer.csproj" Type="Classic C#" />
     <Project Path="samples\YarpSample\YarpSample.csproj" Type="Classic C#" />
+    <Project Path="samples\YarpServiceDiscovery\YarpServiceDiscovery.csproj" Type="Classic C#" />
   </Folder>
   <Folder Name="/shared/">
     <Project Path="shared\Sail.ServiceDiscovery.Consul\Sail.ServiceDiscovery.Consul.csproj" Type="Classic C#" />

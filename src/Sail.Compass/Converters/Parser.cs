@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Primitives;
 using Sail.Api.V1;
 using Sail.Core.Certificates;
 using Yarp.Extensions.Resilience.ServiceDiscovery;
@@ -31,7 +32,7 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
         CancellationToken cancellationToken)
     {
         var clusters = configContext.Clusters;
-
+        IChangeToken? changeToken = null;
         var clusterConfig = new ClusterConfig
         {
             ClusterId = cluster.ClusterId,
@@ -48,6 +49,10 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
         {
             var resolvedDestinations = await resolver.ResolveDestinationsAsync(cluster.ServiceName, cancellationToken);
             clusterConfig = clusterConfig with { Destinations = resolvedDestinations.Destinations };
+            if (resolvedDestinations.ChangeToken is { } token)
+            {
+                changeToken = token;
+            }
         }
 
         clusters.Add(clusterConfig);
@@ -85,7 +90,7 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
             RateLimiterPolicy = route.RateLimiterPolicy,
             TimeoutPolicy = route.TimeoutPolicy,
             CorsPolicy = route.CorsPolicy,
-         //   Timeout = TimeSpan.FromSeconds(route.Timeout),
+            //   Timeout = TimeSpan.FromSeconds(route.Timeout),
             MaxRequestBodySize = route.MaxRequestBodySize,
             Order = route.Order
         };

@@ -15,7 +15,10 @@ builder.Services.AddServiceDiscovery()
 
 builder.Services.AddControllerRuntime();
 builder.Services.AddReverseProxy().LoadFromMessages()
-    .AddServiceDiscoveryDestinationResolver();
+    .AddServiceDiscoveryDestinationResolver(options =>
+    {
+        options.RefreshPeriod = TimeSpan.FromMinutes(30);
+    });
 
 builder.Services.AddConsul(o =>
 {

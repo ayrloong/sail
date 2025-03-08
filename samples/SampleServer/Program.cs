@@ -15,14 +15,6 @@ builder.Services.AddConsul(o =>
     registrationConfig.Name = "test";
     registrationConfig.Address = "http://127.0.0.1";
     registrationConfig.Tags = ["SampleServer"];
-    registrationConfig.Check = new Consul.AgentServiceCheck
-    {
-        DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(15),
-        Interval = TimeSpan.FromSeconds(15),
-        HTTP = "http://127.0.0.1:5132/health",
-        Timeout = TimeSpan.FromSeconds(5),
-        Method = "GET",
-    };
 });
 var app = builder.Build();
 

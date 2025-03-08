@@ -23,6 +23,6 @@ internal static class RoutingHelper
         }
 
         throw new InvalidOperationException(
-            $"The item cannot be selected because the weights are not correctly calculated.");
+            "The item cannot be selected because the weights are not correctly calculated.");
     }
 }

@@ -2,8 +2,8 @@ using Sail.Api.V1;
 
 namespace Sail.Compass.Converters;
 
-internal class DataSourceContext(List<Cluster> clusters, List<Route> routes)
+internal class DataSourceContext(IReadOnlyList<Cluster> clusters, IReadOnlyList<Route> routes)
 {
-    public List<Cluster> Clusters { get; } = clusters;
-    public List<Route> Routes { get; } = routes;
+    public IReadOnlyList<Cluster> Clusters { get; } = clusters;
+    public IReadOnlyList<Route> Routes { get; } = routes;
 }

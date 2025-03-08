@@ -1,8 +1,8 @@
-using System.Net;
 using Consul;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.ServiceDiscovery;
+using Sail.ServiceDiscovery.Consul.Internal;
 
 namespace Sail.ServiceDiscovery.Consul;
 
@@ -30,11 +30,13 @@ internal sealed  class ConsulServiceEndpointProvider(
         var result = await client.Health.Service(hostName).ConfigureAwait(false);
         foreach (var service in result.Response)
         {
-            var ipAddress = new IPAddress(service.Service.Address.Split('.').Select(a => Convert.ToByte(a)).ToArray());
-            var ipPoint = new IPEndPoint(ipAddress, service.Service.Port);
-            var serviceEndpoint = ServiceEndpoint.Create(ipPoint);
-            serviceEndpoint.Features.Set<IServiceEndpointProvider>(this);
-            endpoints.Add(serviceEndpoint);
+            var address = $"{service.Service.Address}:{service.Service.Port}";
+            if (ServiceNameParts.TryCreateEndPoint(address, out var endPoint))
+            {
+                var serviceEndpoint = ServiceEndpoint.Create(endPoint);
+                serviceEndpoint.Features.Set<IServiceEndpointProvider>(this);
+                endpoints.Add(serviceEndpoint);
+            }
         }
 
         if (endpoints.Count == 0)
