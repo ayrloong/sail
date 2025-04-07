@@ -8,7 +8,6 @@ using Sail.Storage.MongoDB.Extensions;
 using Route = Sail.Core.Entities.Route;
 using RouteResponse = Sail.Api.V1.Route;
 
-
 namespace Sail.Grpc;
 
 public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : RouteService.RouteServiceBase
@@ -78,12 +77,17 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
         return new RouteResponse
         {
             RouteId = route.Id.ToString(),
-            Match = new RouteMatch(),
+            Match = new RouteMatch
+            {
+                Path = match.Path
+            },
             Order = route.Order,
+            ClusterId = route.ClusterId?.ToString(),
             CorsPolicy = route.CorsPolicy,
+            Timeout = route.Timeout?.ToString("hh:mm:ss"),
             TimeoutPolicy = route.TimeoutPolicy,
             AuthorizationPolicy = route.AuthorizationPolicy,
-            MaxRequestBodySize = route.MaxRequestBodySize ?? -1,
+            MaxRequestBodySize = route.MaxRequestBodySize,
             RateLimiterPolicy = route.RateLimiterPolicy
         };
     }

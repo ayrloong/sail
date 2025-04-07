@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package sail.api.v1;
 
-
 service DestinationService {
   rpc StreamDestinations(DestinationRequest) returns (stream DestinationItems) {
   }

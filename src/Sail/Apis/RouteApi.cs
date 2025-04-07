@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Sail.Extensions;
+using Sail.Models.Route;
 using Sail.Services;
 
 namespace Sail.Apis;
@@ -57,6 +58,3 @@ public static class RouteApi
         );
     }
 }
-
-public record RouteRequest(Guid ClusterId, string Name, RouteMatchRequest Match);
-public record RouteMatchRequest(string Path,List<string> Methods, List<string> Hosts);

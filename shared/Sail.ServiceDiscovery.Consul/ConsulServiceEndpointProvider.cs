@@ -1,47 +1,50 @@
-using System.Net;
 using Consul;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.ServiceDiscovery;
+using Sail.ServiceDiscovery.Consul.Internal;
 
 namespace Sail.ServiceDiscovery.Consul;
 
-internal sealed partial class ConsulServiceEndpointProvider(
+internal sealed  class ConsulServiceEndpointProvider(
     ServiceEndpointQuery query,
     string hostName,
     IOptionsMonitor<ConsulServiceEndpointProviderOptions> options,
     ILogger<ConsulServiceEndpointProvider> logger,
-    ConsulClient client,
+    IConsulClient client,
     TimeProvider timeProvider) :
     ConsulServiceEndpointProviderBase(query, logger, timeProvider), IHostNameFeature
 {
-    protected override double RetryBackOffFactor { get; }
-    protected override TimeSpan MinRetryPeriod { get; }
-    protected override TimeSpan MaxRetryPeriod { get; }
-    protected override TimeSpan DefaultRefreshPeriod { get; }
+    protected override double RetryBackOffFactor { get; } = options.CurrentValue.RetryBackOffFactor;
+    protected override TimeSpan MinRetryPeriod { get; } = options.CurrentValue.MinRetryPeriod;
+    protected override TimeSpan MaxRetryPeriod { get; } = options.CurrentValue.MaxRetryPeriod;
+    protected override TimeSpan DefaultRefreshPeriod { get; } = options.CurrentValue.DefaultRefreshPeriod;
+
+    public string HostName { get; } = hostName;
+
     protected override async Task ResolveAsyncCore()
     {
         var endpoints = new List<ServiceEndpoint>();
         var ttl = DefaultRefreshPeriod;
         Log.AddressQuery(logger, ServiceName, hostName);
-        var result = await client.Catalog.Service(hostName).ConfigureAwait(false);
-
+        var result = await client.Health.Service(hostName).ConfigureAwait(false);
         foreach (var service in result.Response)
         {
-            var ipAddress = new IPAddress(service.ServiceAddress.Split('.').Select(a => Convert.ToByte(a)).ToArray());
-            var ipPoint = new IPEndPoint(ipAddress, service.ServicePort);
-            var serviceEndpoint = ServiceEndpoint.Create(ipPoint);
-            serviceEndpoint.Features.Set<IServiceEndpointProvider>(this);
-            endpoints.Add(serviceEndpoint);
+            var address = $"{service.Service.Address}:{service.Service.Port}";
+            if (ServiceNameParts.TryCreateEndPoint(address, out var endPoint))
+            {
+                var serviceEndpoint = ServiceEndpoint.Create(endPoint);
+                serviceEndpoint.Features.Set<IServiceEndpointProvider>(this);
+                endpoints.Add(serviceEndpoint);
+            }
         }
-        
+
         if (endpoints.Count == 0)
         {
-            throw new InvalidOperationException($"No records were found for service '{ServiceName}' ( name: '{hostName}').");
+            throw new InvalidOperationException(
+                $"No records were found for service '{ServiceName}' ( name: '{hostName}').");
         }
 
         SetResult(endpoints, ttl);
     }
-
-    public string HostName { get; }
 }

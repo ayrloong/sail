@@ -21,10 +21,12 @@ message WatchClusterResponse{
 
 message Cluster {
   string cluster_id = 1;
-  string load_balancing_policy = 2;
-  ClusterSessionAffinity session_affinity = 3;
-  ClusterHealthCheck health_check = 4;
-  repeated Destination destinations = 5;
+  string  service_name = 2;
+  bool  enabled_service_discovery = 3;
+  string load_balancing_policy = 4;
+  ClusterSessionAffinity session_affinity = 5;
+  ClusterHealthCheck health_check = 6;
+  repeated Destination destinations = 7;
 }
 
 message ClusterSessionAffinity {

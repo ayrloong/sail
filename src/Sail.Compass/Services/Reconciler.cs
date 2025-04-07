@@ -5,7 +5,7 @@ using Sail.Core.ConfigProvider;
 
 namespace Sail.Compass.Services;
 
-public class Reconciler(ICache cache, IUpdateConfig updateConfig) : IReconciler
+internal class Reconciler(ICache cache, Parser parser, IUpdateConfig updateConfig) : IReconciler
 {
     public async Task ProcessAsync(CancellationToken cancellationToken)
     {
@@ -14,8 +14,8 @@ public class Reconciler(ICache cache, IUpdateConfig updateConfig) : IReconciler
         var routes = cache.GetRoutes();
         var context = new DataSourceContext(clusters, routes);
 
-        Parser.ConvertFromDataSource(context, configContext);
-
+        await parser.ConvertFromDataSourceAsync(context, configContext, cancellationToken);
+        
         await updateConfig.UpdateAsync(configContext.Routes, configContext.Clusters,
             cancellationToken);
     }

@@ -2,9 +2,8 @@ using ErrorOr;
 using MongoDB.Driver;
 using Sail.Core.Entities;
 using Sail.Storage.MongoDB;
-using Sail.Apis;
+using Sail.Models.Route;
 using Route = Sail.Core.Entities.Route;
-
 
 namespace Sail.Services;
 
@@ -23,7 +22,29 @@ public class RouteService(SailContext context) : IRouteService
         var route = new Route
         {
             Name = request.Name,
+            ClusterId = request.ClusterId,
+            Match = new RouteMatch
+            {
+                Path = request.Match.Path,
+                Hosts = request.Match.Hosts ?? [],
+                Methods = request.Match.Methods ?? [],
+                QueryParameters = request.Match.ParameterRequests?.Select(x => new RouteQueryParameter
+                {
+                    Name = x.Name,
+                    Values = x.Values,
+                    Mode = x.Mode,
+                    IsCaseSensitive = x.IsCaseSensitive
+                }).ToList() ?? [],
+                Headers = request.Match.RouteHeaders?.Select(x => new RouteHeader
+                {
+                    Name = x.Name,
+                    Values = x.Values,
+                    Mode = x.Mode,
+                    IsCaseSensitive = x.IsCaseSensitive
+                }).ToList() ?? []
+            }
         };
+        
         await context.Routes.InsertOneAsync(route, cancellationToken: cancellationToken);
         return Result.Created;
     }
@@ -54,6 +75,7 @@ public class RouteService(SailContext context) : IRouteService
         return new RouteVm
         {
             Id = route.Id,
+            ClusterId = route.ClusterId,
             Name = route.Name,
             Match = new RouteMatchVm
             {
@@ -87,46 +109,4 @@ public class RouteService(SailContext context) : IRouteService
             UpdatedAt = route.UpdatedAt
         };
     }
-}
-
-public record RouteVm
-{
-    public Guid Id { get; init; }
-    public Guid ClusterId { get; init; }
-    public string Name { get; init; }
-    public RouteMatchVm Match { get; init; }
-    public int Order { get; init; }
-    public string? AuthorizationPolicy { get; init; }
-    public string? RateLimiterPolicy { get; init; }
-    public string? CorsPolicy { get; init; }
-    public string? TimeoutPolicy { get; init; }
-    public TimeSpan? Timeout { get; init; }
-    public long? MaxRequestBodySize { get; init; }
-    public DateTimeOffset CreatedAt { get; init; }
-    public DateTimeOffset UpdatedAt { get; init; }
-}
-
-public record RouteMatchVm
-{
-    public List<string> Methods { get; init; }
-    public List<string> Hosts { get; init; }
-    public IEnumerable<RouteHeaderVm> Headers  { get; init; }
-    public string Path { get; init; }
-    public IEnumerable<RouteQueryParameterVm> QueryParameters { get; init; }
-}
-
-public record RouteHeaderVm
-{
-    public string Name { get; init; }
-    public List<string> Values { get; init; }
-    public HeaderMatchMode Mode { get; init; }
-    public bool IsCaseSensitive { get; init; }
-}
-
-public class RouteQueryParameterVm
-{
-    public string Name { get; init; }
-    public List<string> Values { get; init; }
-    public QueryParameterMatchMode Mode { get; init; }
-    public bool IsCaseSensitive { get; init; }
 }

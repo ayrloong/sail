@@ -12,6 +12,10 @@ public class SailContext
 {
     private readonly IMongoDatabase _database;
 
+    private const string ClusterTableName = "clusters";
+    private const string RouteTableName = "routes";
+    private const string CertificateTableName = "certificates";
+
     public SailContext(IOptions<DatabaseOptions> options)
     {
         var client = new MongoClient(options.Value.ConnectionString);
@@ -23,9 +27,9 @@ public class SailContext
         RegisterClassMaps();
     }
 
-    public IMongoCollection<Cluster> Clusters => _database.GetCollection<Cluster>("clusters");
-    public IMongoCollection<Route> Routes => _database.GetCollection<Route>("routes");
-    public IMongoCollection<Certificate> Certificates => _database.GetCollection<Certificate>("certificates");
+    public IMongoCollection<Cluster> Clusters => _database.GetCollection<Cluster>(ClusterTableName);
+    public IMongoCollection<Route> Routes => _database.GetCollection<Route>(RouteTableName);
+    public IMongoCollection<Certificate> Certificates => _database.GetCollection<Certificate>(CertificateTableName);
 
     public async Task InitializeAsync()
     {
@@ -36,9 +40,9 @@ public class SailContext
                 Enabled = true
             }
         };
-        await _database.CreateCollectionAsync("routes", collectionOptions);
-        await _database.CreateCollectionAsync("clusters", collectionOptions);
-        await _database.CreateCollectionAsync("certificates", collectionOptions);
+        await _database.CreateCollectionAsync(ClusterTableName, collectionOptions);
+        await _database.CreateCollectionAsync(RouteTableName, collectionOptions);
+        await _database.CreateCollectionAsync(CertificateTableName, collectionOptions);
     }
     private static void RegisterClassMaps()
     {
@@ -49,6 +53,8 @@ public class SailContext
                 classMap.AutoMap();
                 classMap.MapIdMember(x => x.Id)
                     .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
+                classMap.MapMember(x => x.ClusterId)
+                    .SetSerializer(new NullableSerializer<Guid>(new GuidSerializer(GuidRepresentation.Standard)));
             });
         }
 

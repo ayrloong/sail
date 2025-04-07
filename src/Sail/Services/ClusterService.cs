@@ -23,6 +23,8 @@ public class ClusterService(SailContext context) : IClusterService
         {
             Name = request.Name,
             LoadBalancingPolicy = request.LoadBalancingPolicy,
+            ServiceName = request.ServiceName,
+            ServiceDiscoveryType = request.ServiceDiscoveryType,
             Destinations = request.Destinations.Select(item => new Destination
             {
                 Host = item.Host,
@@ -60,6 +62,8 @@ public class ClusterService(SailContext context) : IClusterService
         {
             Id = cluster.Id,
             Name = cluster.Name,
+            ServiceName = cluster.ServiceName,
+            ServiceDiscoveryType = cluster.ServiceDiscoveryType,
             LoadBalancingPolicy = cluster.LoadBalancingPolicy,
             Destinations = cluster.Destinations?.Select(d => new DestinationVm
             {
@@ -76,7 +80,9 @@ public class ClusterService(SailContext context) : IClusterService
 public record ClusterVm
 {
     public Guid Id { get; init; }
-    public string Name { get; init; }
+    public string? Name { get; init; }
+    public string? ServiceName { get; set; }
+    public string? ServiceDiscoveryType { get; set; }
     public string? LoadBalancingPolicy { get; init; }
     public IEnumerable<DestinationVm>? Destinations { get; init; }
     public DateTimeOffset CreatedAt { get; init; }
@@ -85,7 +91,7 @@ public record ClusterVm
 
 public record DestinationVm
 {
-    public string Address { get; init; }
+    public string? Address { get; init; }
     public string? Health { get; init; }
     public string? Host { get; init; }
 }

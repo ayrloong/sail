@@ -3,7 +3,6 @@ using Sail.Core;
 using Sail.Core.Stores;
 using Sail.Storage.MongoDB.Stores;
 
-
 namespace Sail.Storage.MongoDB.Management;
 
 public static class SailStorageBuilderExtensions

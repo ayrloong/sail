@@ -8,6 +8,7 @@ public interface ICache
     void UpdateRoute(ResourceEvent<Route> resource);
     void UpdateCluster(ResourceEvent<Cluster> resource);
     void UpdateCertificate(ResourceEvent<Certificate> resource);
-    List<Route> GetRoutes();
-    List<Cluster> GetClusters();
+    IReadOnlyList<Route> GetRoutes();
+    IReadOnlyList<Cluster> GetClusters();
+    IReadOnlyList<Certificate> GetCertificates();
 }
