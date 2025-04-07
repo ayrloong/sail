@@ -1,13 +1,13 @@
-using Microsoft.Extensions.Primitives;
+using System.Globalization;
 using Sail.Api.V1;
 using Sail.Core.Certificates;
-using Yarp.Extensions.Resilience.ServiceDiscovery;
 using Yarp.ReverseProxy.Configuration;
+using Yarp.ReverseProxy.Health;
 using RouteMatch = Yarp.ReverseProxy.Configuration.RouteMatch;
 
 namespace Sail.Compass.Converters;
 
-internal class Parser(IServiceDiscoveryDestinationResolver resolver)
+internal class Parser(IClusterDestinationsUpdater destinationsUpdater)
 {
     IReadOnlyList<CertificateConfig> ConvertCertificates(IEnumerable<Certificate> certificates)
     {
@@ -28,11 +28,10 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
         }
     }
 
-    async ValueTask HandleClusterAsyncCore(YarpConfigContext configContext, Cluster cluster,
+    ValueTask HandleClusterAsyncCore(YarpConfigContext configContext, Cluster cluster,
         CancellationToken cancellationToken)
     {
         var clusters = configContext.Clusters;
-        IChangeToken? changeToken = null;
         var clusterConfig = new ClusterConfig
         {
             ClusterId = cluster.ClusterId,
@@ -44,18 +43,26 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
                 Address = x.Address
             })
         };
-
+        
         if (cluster.EnabledServiceDiscovery)
         {
-            var resolvedDestinations = await resolver.ResolveDestinationsAsync(cluster.ServiceName, cancellationToken);
-            clusterConfig = clusterConfig with { Destinations = resolvedDestinations.Destinations };
-            if (resolvedDestinations.ChangeToken is { } token)
+            clusterConfig = clusterConfig with
             {
-                changeToken = token;
-            }
+                Destinations = new Dictionary<string, DestinationConfig>
+                {
+                    {
+                        cluster.ServiceName, new DestinationConfig
+                        {
+                            Address = $"http://{cluster.ServiceName}",
+                            Host = cluster.ServiceName
+                        }
+                    }
+                }
+            };
         }
 
         clusters.Add(clusterConfig);
+        return ValueTask.CompletedTask;
     }
 
     ValueTask HandleRouteAsyncCore(YarpConfigContext configContext, Route route, CancellationToken cancellationToken)
@@ -88,13 +95,12 @@ internal class Parser(IServiceDiscoveryDestinationResolver resolver)
             },
             AuthorizationPolicy = route.AuthorizationPolicy,
             RateLimiterPolicy = route.RateLimiterPolicy,
+            Timeout = TimeSpan.TryParse(route.Timeout, CultureInfo.InvariantCulture, out var timeout) ? timeout : null,
             TimeoutPolicy = route.TimeoutPolicy,
             CorsPolicy = route.CorsPolicy,
-            //   Timeout = TimeSpan.FromSeconds(route.Timeout),
             MaxRequestBodySize = route.MaxRequestBodySize,
             Order = route.Order
         };
-
         routes.Add(routeConfig);
         return ValueTask.CompletedTask;
     }

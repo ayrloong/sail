@@ -1,14 +1,17 @@
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.ServiceDiscovery;
 using Yarp.ReverseProxy.Configuration;
 
 namespace Sail.Core.ConfigProvider;
 
-public class ProxyConfigProvider : IProxyConfigProvider, IUpdateConfig
+public class ProxyConfigProvider: IProxyConfigProvider, IUpdateConfig
 {
-    private volatile MessageConfig _config = new(null, null);
+    private volatile MessageConfig _config = new([], []);
+    private CancellationTokenSource? _cts;
     public IProxyConfig GetConfig() => _config;
 
-    public Task UpdateAsync(IReadOnlyList<RouteConfig> routes, IReadOnlyList<ClusterConfig> clusters,
+    public  Task UpdateAsync(IReadOnlyList<RouteConfig> routes, IReadOnlyList<ClusterConfig> clusters,
         CancellationToken cancellationToken)
     {
         var newConfig = new MessageConfig(routes, clusters);
@@ -17,7 +20,7 @@ public class ProxyConfigProvider : IProxyConfigProvider, IUpdateConfig
 
         return Task.CompletedTask;
     }
-
+    
     class MessageConfig : IProxyConfig
     {
         private readonly CancellationTokenSource _cts = new();

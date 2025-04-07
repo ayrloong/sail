@@ -29,8 +29,8 @@ message Route {
   google.protobuf.StringValue rate_limiter_policy = 6;
   google.protobuf.StringValue cors_policy = 7;
   google.protobuf.StringValue timeout_policy = 8;
-  int32 timeout = 9;
-  int64 max_request_body_size = 10;
+  google.protobuf.StringValue timeout = 9;
+  google.protobuf.Int64Value max_request_body_size = 10;
 }
 
 message RouteMatch {

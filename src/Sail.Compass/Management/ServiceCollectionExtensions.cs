@@ -40,9 +40,9 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        var provider = new ProxyConfigProvider();
-        builder.Services.AddSingleton<IProxyConfigProvider>(provider);
-        builder.Services.AddSingleton<IUpdateConfig>(provider);
+        var configProvider = new ProxyConfigProvider();
+        builder.Services.AddSingleton<IProxyConfigProvider>(configProvider);
+        builder.Services.AddSingleton<IUpdateConfig>(configProvider);
         return builder;
     }
 }

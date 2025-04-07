@@ -2,7 +2,6 @@ using Consul.AspNetCore;
 using Sail.Api.V1;
 using Sail.Compass.Management;
 using Sail.Core.Management;
-using Yarp.Extensions.Resilience.ServiceDiscovery;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +14,7 @@ builder.Services.AddServiceDiscovery()
 
 builder.Services.AddControllerRuntime();
 builder.Services.AddReverseProxy().LoadFromMessages()
-    .AddServiceDiscoveryDestinationResolver(options =>
-    {
-        options.RefreshPeriod = TimeSpan.FromMinutes(30);
-    });
+    .AddServiceDiscoveryDestinationResolver();
 
 builder.Services.AddConsul(o =>
 {
@@ -28,7 +24,6 @@ builder.Services.AddConsul(o =>
 builder.Services.AddGrpcClient<ClusterService.ClusterServiceClient>(o => o.Address = new Uri("http://localhost:8000"));
 builder.Services.AddGrpcClient<RouteService.RouteServiceClient>(o => o.Address = new Uri("http://localhost:8000"));
 builder.Services.AddGrpcClient<CertificateService.CertificateServiceClient>(o => o.Address = new Uri("http://localhost:8000"));
-
 
 var app = builder.Build();
 
