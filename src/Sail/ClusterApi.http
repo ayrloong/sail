@@ -1,0 +1,34 @@
+@baseUrl = http://localhost:8100
+@apiVersion = 1.0
+@id = D39C79CB-9867-4EAE-B9EC-9CF09573C825
+
+### Get all clusters
+GET {{baseUrl}}/api/clusters?api-version={{apiVersion}}
+Accept: application/json
+
+### Create the cluster
+POST {{baseUrl}}/api/clusters?api-version={{apiVersion}}
+Content-Type: application/json
+
+{
+  "name": "example",
+  "destinations": [
+    {
+      "address": "https://example.com/"
+    }
+  ]
+}
+
+### Update the cluster
+PUT {{baseUrl}}/api/clusters/{{id}}?api-version={{apiVersion}}
+Content-Type: application/json
+
+{
+  "name": "example-updater",
+  "serviceName": "example",
+  "serviceDiscoveryType": "Consul",
+  "destinations": []
+}
+
+### Delete the cluster
+DELETE {{baseUrl}}/api/clusters/{{id}}?api-version={{apiVersion}}

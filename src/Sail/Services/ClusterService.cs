@@ -39,9 +39,11 @@ public class ClusterService(SailContext context)
     public async Task<ErrorOr<Updated>> UpdateAsync(Guid id, ClusterRequest request,CancellationToken cancellationToken = default)
     {
         var filter = Builders<Cluster>.Filter.And(Builders<Cluster>.Filter.Where(x => x.Id == id));
-        
+
         var update = Builders<Cluster>.Update
-            .Set(x => x.Name,request.Name)
+            .Set(x => x.Name, request.Name)
+            .Set(x => x.ServiceName, request.ServiceName)
+            .Set(x => x.ServiceDiscoveryType, request.ServiceDiscoveryType)
             .Set(x => x.LoadBalancingPolicy, request.LoadBalancingPolicy)
             .Set(x => x.UpdatedAt, DateTimeOffset.UtcNow);
 

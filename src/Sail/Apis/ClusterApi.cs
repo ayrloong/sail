@@ -13,7 +13,7 @@ public static class ClusterApi
 
         api.MapGet("/", GetItems);
         api.MapPost("/", Create);
-        api.MapPatch("/{id:guid}", Update);
+        api.MapPut("/{id:guid}", Update);
         api.MapDelete("/{id:guid}", Delete);
         return api;
     }
@@ -42,7 +42,7 @@ public static class ClusterApi
         var result = await service.UpdateAsync(id, request, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            updated => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }
@@ -53,7 +53,7 @@ public static class ClusterApi
         var result = await service.DeleteAsync(id, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            deleted => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }

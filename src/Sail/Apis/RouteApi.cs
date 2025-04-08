@@ -13,7 +13,7 @@ public static class RouteApi
 
         api.MapGet("/", GetItems);
         api.MapPost("/", Create);
-        api.MapPatch("/{id:guid}", Update);
+        api.MapPut("/{id:guid}", Update);
         api.MapDelete("/{id:guid}", Delete);
         return api;
     }
