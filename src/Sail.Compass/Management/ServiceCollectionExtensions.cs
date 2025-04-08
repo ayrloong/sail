@@ -10,6 +10,7 @@ using Sail.Compass.Informers;
 using Sail.Compass.Services;
 using Sail.Core.Certificates;
 using Sail.Core.ConfigProvider;
+using Sail.Core.Options;
 using Yarp.ReverseProxy.Configuration;
 
 namespace Sail.Compass.Management;
@@ -18,6 +19,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddControllerRuntime(this IServiceCollection services)
     {
+        services.AddResourceClient();
         services.AddSingleton<Parser>();
         services.AddSingleton<ICache, DefaultCache>();
         services.AddTransient<IReconciler, Reconciler>();
@@ -25,17 +27,39 @@ public static class ServiceCollectionExtensions
         services.RegisterResourceInformer<Route, V1RouteResourceInformer>();
         services.RegisterResourceInformer<Cluster, V1ClusterResourceInformer>();
         services.RegisterResourceInformer<Certificate, V1CertificateResourceInformer>();
-        
+
         return services;
     }
+
+    private static IServiceCollection AddResourceClient(this IServiceCollection services)
+    {
+        services.AddGrpcClient<ClusterService.ClusterServiceClient>((sp, o) =>
+        {
+            var receiverOptions = sp.GetService<IOptions<ReceiverOptions>>()?.Value;
+            o.Address = receiverOptions?.ControllerUrl;
+        });
+        services.AddGrpcClient<RouteService.RouteServiceClient>((sp, o) =>
+        {
+            var receiverOptions = sp.GetService<IOptions<ReceiverOptions>>()?.Value;
+            o.Address = receiverOptions?.ControllerUrl;
+        });
+        services.AddGrpcClient<CertificateService.CertificateServiceClient>((sp, o) =>
+        {
+            var receiverOptions = sp.GetService<IOptions<ReceiverOptions>>()?.Value;
+            o.Address = receiverOptions?.ControllerUrl;
+        });
+        return services;
+    }
+
     private static IServiceCollection RegisterResourceInformer<TResource, TService>(this IServiceCollection services)
         where TResource : class
         where TService : IResourceInformer<TResource>
     {
-        services.AddSingleton(typeof(IResourceInformer<TResource>), typeof(TService)); 
+        services.AddSingleton(typeof(IResourceInformer<TResource>), typeof(TService));
 
         return services.RegisterHostedService<IResourceInformer<TResource>>();
     }
+
     public static IReverseProxyBuilder LoadFromMessages(this IReverseProxyBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

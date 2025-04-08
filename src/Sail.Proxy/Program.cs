@@ -1,7 +1,7 @@
 using Consul.AspNetCore;
-using Sail.Api.V1;
 using Sail.Compass.Management;
 using Sail.Core.Management;
+using Sail.Core.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,14 +16,11 @@ builder.Services.AddControllerRuntime();
 builder.Services.AddReverseProxy().LoadFromMessages()
     .AddServiceDiscoveryDestinationResolver();
 
+var consulOptions = builder.Configuration.Get<ConsulOptions>();
 builder.Services.AddConsul(o =>
 {
-    o.Address = new Uri("http://127.0.0.1:8500");
+    o.Address = new Uri(consulOptions?.Address);
 });
-
-builder.Services.AddGrpcClient<ClusterService.ClusterServiceClient>(o => o.Address = new Uri("http://localhost:8000"));
-builder.Services.AddGrpcClient<RouteService.RouteServiceClient>(o => o.Address = new Uri("http://localhost:8000"));
-builder.Services.AddGrpcClient<CertificateService.CertificateServiceClient>(o => o.Address = new Uri("http://localhost:8000"));
 
 var app = builder.Build();
 

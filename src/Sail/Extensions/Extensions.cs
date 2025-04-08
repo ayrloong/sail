@@ -12,8 +12,8 @@ public static class Extensions
         services.AddOptions<DatabaseOptions>()
             .BindConfiguration(DatabaseOptions.Name);
 
-        services.TryAddScoped<IRouteService, RouteService>();
-        services.TryAddScoped<IClusterService, ClusterService>();
-        services.TryAddScoped<ICertificateService, CertificateService>();
+        services.TryAddScoped<RouteService>();
+        services.TryAddScoped<ClusterService>();
+        services.TryAddScoped<CertificateService>();
     }
 }

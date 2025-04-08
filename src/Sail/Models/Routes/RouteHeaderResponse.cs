@@ -1,11 +1,11 @@
 using Sail.Core.Entities;
 
-namespace Sail.Models.Route;
+namespace Sail.Models.Routes;
 
-public class RouteQueryParameterVm
+public record RouteHeaderResponse
 {
     public string Name { get; init; }
     public List<string> Values { get; init; }
-    public QueryParameterMatchMode Mode { get; init; }
+    public HeaderMatchMode Mode { get; init; }
     public bool IsCaseSensitive { get; init; }
 }

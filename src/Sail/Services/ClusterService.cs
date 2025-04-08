@@ -1,20 +1,20 @@
 using ErrorOr;
-using Sail.Apis;
 using Sail.Core.Entities;
 using MongoDB.Driver;
+using Sail.Models.Clusters;
 using Sail.Storage.MongoDB;
 
 namespace Sail.Services;
 
-public class ClusterService(SailContext context) : IClusterService
+public class ClusterService(SailContext context)
 {
-    public async Task<IEnumerable<ClusterVm>> GetAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ClusterResponse>> GetAsync(CancellationToken cancellationToken = default)
     {
         var filter = Builders<Cluster>.Filter.Empty;
         var routes = await context.Clusters.FindAsync(filter, cancellationToken: cancellationToken);
         var items = await routes.ToListAsync(cancellationToken: cancellationToken);
 
-        return items.Select(MapToClusterVm);
+        return items.Select(MapToCluster);
     }
 
     public async Task<ErrorOr<Created>> CreateAsync(ClusterRequest request,CancellationToken cancellationToken = default)
@@ -56,16 +56,16 @@ public class ClusterService(SailContext context) : IClusterService
         return Result.Deleted;
     }
 
-    private ClusterVm MapToClusterVm(Cluster cluster)
+    private ClusterResponse MapToCluster(Cluster cluster)
     {
-        return new ClusterVm
+        return new ClusterResponse
         {
             Id = cluster.Id,
             Name = cluster.Name,
             ServiceName = cluster.ServiceName,
             ServiceDiscoveryType = cluster.ServiceDiscoveryType,
             LoadBalancingPolicy = cluster.LoadBalancingPolicy,
-            Destinations = cluster.Destinations?.Select(d => new DestinationVm
+            Destinations = cluster.Destinations?.Select(d => new DestinationResponse
             {
                 Host = d.Host,
                 Address = d.Address,
@@ -75,23 +75,4 @@ public class ClusterService(SailContext context) : IClusterService
             UpdatedAt = cluster.UpdatedAt
         };
     }
-}
-
-public record ClusterVm
-{
-    public Guid Id { get; init; }
-    public string? Name { get; init; }
-    public string? ServiceName { get; set; }
-    public string? ServiceDiscoveryType { get; set; }
-    public string? LoadBalancingPolicy { get; init; }
-    public IEnumerable<DestinationVm>? Destinations { get; init; }
-    public DateTimeOffset CreatedAt { get; init; }
-    public DateTimeOffset UpdatedAt { get; init; }
-}
-
-public record DestinationVm
-{
-    public string? Address { get; init; }
-    public string? Health { get; init; }
-    public string? Host { get; init; }
 }

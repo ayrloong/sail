@@ -1,11 +1,11 @@
-namespace Sail.Models.Route;
+namespace Sail.Models.Routes;
 
-public record RouteVm
+public record RouteResponse
 {
     public Guid Id { get; init; }
     public Guid? ClusterId { get; init; }
     public string Name { get; init; }
-    public RouteMatchVm Match { get; init; }
+    public RouteMatchResponse Match { get; init; }
     public int Order { get; init; }
     public string? AuthorizationPolicy { get; init; }
     public string? RateLimiterPolicy { get; init; }

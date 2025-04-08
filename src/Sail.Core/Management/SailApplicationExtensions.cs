@@ -16,5 +16,7 @@ public static class SailApplicationExtensions
     {
         services.AddOptions<DatabaseOptions>(nameof(DatabaseOptions.Name));
         services.AddOptions<CertificateOptions>(nameof(CertificateOptions.Name));
+        services.AddOptions<ConsulOptions>(nameof(ConsulOptions.Name));
+        services.AddOptions<ReceiverOptions>(nameof(ReceiverOptions.Name));
     }
 }

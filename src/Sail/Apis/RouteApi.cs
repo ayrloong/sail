@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Sail.Extensions;
-using Sail.Models.Route;
+using Sail.Models.Routes;
 using Sail.Services;
 
 namespace Sail.Apis;
@@ -18,14 +18,14 @@ public static class RouteApi
         return api;
     }
 
-    private static async Task<Results<Ok<IEnumerable<RouteVm>>, NotFound>> GetItems(IRouteService service,
+    private static async Task<Results<Ok<IEnumerable<RouteResponse>>, NotFound>> GetItems(RouteService service,
         CancellationToken cancellationToken)
     {
         var items = await service.GetAsync(cancellationToken);
         return TypedResults.Ok(items);
     }
 
-    private static async Task<Results<Created, ProblemHttpResult>> Create(IRouteService service, RouteRequest request,
+    private static async Task<Results<Created, ProblemHttpResult>> Create(RouteService service, RouteRequest request,
         CancellationToken cancellationToken)
     {
         var result = await service.CreateAsync(request, cancellationToken);
@@ -36,7 +36,7 @@ public static class RouteApi
         );
     }
 
-    private static async Task<Results<Ok, ProblemHttpResult>> Update(IRouteService service, Guid id,
+    private static async Task<Results<Ok, ProblemHttpResult>> Update(RouteService service, Guid id,
         RouteRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateAsync(id, request, cancellationToken);
@@ -47,7 +47,7 @@ public static class RouteApi
         );
     }
 
-    private static async Task<Results<Ok, ProblemHttpResult>> Delete(IRouteService service, Guid id,
+    private static async Task<Results<Ok, ProblemHttpResult>> Delete(RouteService service, Guid id,
         CancellationToken cancellationToken)
     {
         var result = await service.DeleteAsync(id, cancellationToken);

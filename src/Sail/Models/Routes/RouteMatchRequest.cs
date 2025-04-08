@@ -1,4 +1,4 @@
-namespace Sail.Models.Route;
+namespace Sail.Models.Routes;
 
 public record RouteMatchRequest(
     string Path,

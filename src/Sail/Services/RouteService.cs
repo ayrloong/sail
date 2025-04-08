@@ -2,19 +2,19 @@ using ErrorOr;
 using MongoDB.Driver;
 using Sail.Core.Entities;
 using Sail.Storage.MongoDB;
-using Sail.Models.Route;
+using Sail.Models.Routes;
 using Route = Sail.Core.Entities.Route;
 
 namespace Sail.Services;
 
-public class RouteService(SailContext context) : IRouteService
+public class RouteService(SailContext context)
 {
-    public async Task<IEnumerable<RouteVm>> GetAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<RouteResponse>> GetAsync(CancellationToken cancellationToken = default)
     {
         var filter = Builders<Route>.Filter.Empty;
         var routes = await context.Routes.FindAsync(filter, cancellationToken: cancellationToken);
         var items = await routes.ToListAsync(cancellationToken: cancellationToken);
-        return items.Select(MapToRouteVm);
+        return items.Select(MapToRoute);
     }
 
     public async Task<ErrorOr<Created>> CreateAsync(RouteRequest request,CancellationToken cancellationToken = default)
@@ -70,19 +70,19 @@ public class RouteService(SailContext context) : IRouteService
         return Result.Deleted;
     }
 
-    private RouteVm MapToRouteVm(Route route)
+    private RouteResponse MapToRoute(Route route)
     {
-        return new RouteVm
+        return new RouteResponse
         {
             Id = route.Id,
             ClusterId = route.ClusterId,
             Name = route.Name,
-            Match = new RouteMatchVm
+            Match = new RouteMatchResponse
             {
                 Path = route.Match.Path,
                 Hosts = route.Match.Hosts,
                 Methods = route.Match.Methods,
-                Headers = route.Match.Headers.Select(h => new RouteHeaderVm
+                Headers = route.Match.Headers.Select(h => new RouteHeaderResponse
                 {
                     Name = h.Name,
                     Mode = h.Mode,
@@ -90,7 +90,7 @@ public class RouteService(SailContext context) : IRouteService
                     IsCaseSensitive = h.IsCaseSensitive
 
                 }),
-                QueryParameters = route.Match.QueryParameters.Select(q => new RouteQueryParameterVm
+                QueryParameters = route.Match.QueryParameters.Select(q => new RouteQueryParameterResponse
                 {  
                     Name = q.Name,
                     Mode = q.Mode,
