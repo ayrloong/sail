@@ -2,11 +2,13 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MongoDB.Driver;
 using Sail.Api.V1;
+using Sail.Core.Entities;
 using Sail.Core.Stores;
 using Sail.Storage.MongoDB;
 using Sail.Storage.MongoDB.Extensions;
 using Cluster = Sail.Core.Entities.Cluster;
 using ClusterResponse =  Sail.Api.V1.Cluster;
+using Destination = Sail.Api.V1.Destination;
 
 namespace Sail.Grpc;
 
@@ -90,9 +92,8 @@ public class ClusterGrpcService(SailContext dbContext, IClusterStore clusterStor
         };
     }
 
-    private static bool IsServiceDiscoveryEnabled(string? serviceName, string? serviceDiscoveryType)
+    private static bool IsServiceDiscoveryEnabled(string? serviceName, ServiceDiscoveryType? serviceDiscoveryType)
     {
-        return !string.IsNullOrEmpty(serviceName) &&
-               !string.IsNullOrEmpty(serviceDiscoveryType);
+        return !string.IsNullOrEmpty(serviceName) && serviceDiscoveryType is not null;
     }
 }

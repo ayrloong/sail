@@ -19,9 +19,10 @@ public static class ClusterApi
     }
 
     private static async Task<Results<Ok<IEnumerable<ClusterResponse>>, NotFound>> GetItems(ClusterService service,
+        string? keywords,
         CancellationToken cancellationToken)
     {
-        var items = await service.GetAsync(cancellationToken);
+        var items = await service.GetAsync(keywords, cancellationToken);
         return TypedResults.Ok(items);
     }
 

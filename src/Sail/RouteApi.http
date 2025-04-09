@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8100
 @apiVersion = 1.0
-@id = 47083A2E-9E75-4967-BDD0-010E2BCA0B05
+@id = 1A40D49E-75CE-44F5-9600-E7FE2582700C
 @clusterId = 84CE8448-CF61-4D58-870B-AA515BD44C17
 
 ### Get all routes
@@ -23,7 +23,22 @@ Content-Type: application/json
    "timeout": "00:00:01",
    "maxRequestBodySize": -1,
    "match": {
-      
+      "path": "{**catch-all}",
+      "hosts": ["www.example.com"],
+      "methods": ["GET","POST","DELETE","PUT"],
+      "queryParameters": [
+        {
+          "name": "queryparam1",
+          "values": [ "value1" ],
+          "mode": 1
+        }
+      ],
+       "headers": [
+        {
+          "name": "header3",
+          "mode": 1
+        }
+      ]
    }
 }
 
@@ -42,7 +57,22 @@ Content-Type: application/json
    "timeout": "00:00:01",
    "maxRequestBodySize": -1,
    "match": {
-      
+      "path": "{**catch-all}",
+      "hosts": ["www.example.com"],
+      "methods": ["GET","POST","DELETE","PUT"],
+      "queryParameters": [
+        {
+          "name": "queryparam1",
+          "values": [ "value1" ],
+          "mode": 1
+        }
+      ],
+       "headers": [
+        {
+          "name": "header3",
+          "mode": 1
+        }
+      ]
    }
 }
 

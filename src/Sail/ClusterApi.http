@@ -1,9 +1,9 @@
 @baseUrl = http://localhost:8100
 @apiVersion = 1.0
-@id = D39C79CB-9867-4EAE-B9EC-9CF09573C825
+@id = 1F61D93E-836F-4969-9E1C-E08F62718213
 
 ### Get all clusters
-GET {{baseUrl}}/api/clusters?api-version={{apiVersion}}
+GET {{baseUrl}}/api/clusters?keywords=example&api-version={{apiVersion}}
 Accept: application/json
 
 ### Create the cluster
@@ -12,6 +12,22 @@ Content-Type: application/json
 
 {
   "name": "example",
+  "healthCheck": {
+    "availableDestinationsPolicy": "HealthyOrPanic",
+    "active": {
+      "enabled": true,
+      "interval": "00:00:10",
+      "timeout": "00:00:10",
+      "policy": "ConsecutiveFailures",
+      "path": "/api/health",
+      "query": "?foo=bar"
+    },
+    "passive": {
+      "enabled": true,
+      "policy": "TransportFailureRate",
+      "reactivationPeriod": "00:02:00"
+    }
+  },
   "destinations": [
     {
       "address": "https://example.com/"
@@ -26,7 +42,7 @@ Content-Type: application/json
 {
   "name": "example-updater",
   "serviceName": "example",
-  "serviceDiscoveryType": "Consul",
+  "serviceDiscoveryType": 1,
   "destinations": []
 }
 

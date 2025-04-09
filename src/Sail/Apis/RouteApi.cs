@@ -19,9 +19,10 @@ public static class RouteApi
     }
 
     private static async Task<Results<Ok<IEnumerable<RouteResponse>>, NotFound>> GetItems(RouteService service,
+        string? keywords,
         CancellationToken cancellationToken)
     {
-        var items = await service.GetAsync(cancellationToken);
+        var items = await service.GetAsync(keywords, cancellationToken);
         return TypedResults.Ok(items);
     }
 
@@ -42,7 +43,7 @@ public static class RouteApi
         var result = await service.UpdateAsync(id, request, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            updated => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }
@@ -53,7 +54,7 @@ public static class RouteApi
         var result = await service.DeleteAsync(id, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            deleted => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }

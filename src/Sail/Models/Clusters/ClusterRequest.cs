@@ -1,8 +1,11 @@
+using Sail.Core.Entities;
+
 namespace Sail.Models.Clusters;
 
 public record ClusterRequest(
     string Name,
     string ServiceName,
-    string ServiceDiscoveryType,
+    ServiceDiscoveryType? ServiceDiscoveryType,
+    HealthCheckRequest? HealthCheck,
     string LoadBalancingPolicy,
     List<DestinationRequest> Destinations);
