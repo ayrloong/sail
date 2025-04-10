@@ -19,7 +19,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddControllerRuntime(this IServiceCollection services)
     {
-        services.AddResourceClient();
+        services.AddResourceInformerClient();
         services.AddSingleton<Parser>();
         services.AddSingleton<ICache, DefaultCache>();
         services.AddTransient<IReconciler, Reconciler>();
@@ -31,22 +31,22 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddResourceClient(this IServiceCollection services)
+    private static IServiceCollection AddResourceInformerClient(this IServiceCollection services)
     {
         services.AddGrpcClient<ClusterService.ClusterServiceClient>((sp, o) =>
         {
-            var receiverOptions = sp.GetService<IOptions<ReceiverOptions>>()?.Value;
-            o.Address = receiverOptions?.ControllerUrl;
+            var receiverOptions = sp.GetRequiredService<IOptions<ReceiverOptions>>().Value;
+            o.Address = new Uri("http://localhost:8000");
         });
         services.AddGrpcClient<RouteService.RouteServiceClient>((sp, o) =>
         {
-            var receiverOptions = sp.GetService<IOptions<ReceiverOptions>>()?.Value;
-            o.Address = receiverOptions?.ControllerUrl;
+            var receiverOptions = sp.GetRequiredService<IOptions<ReceiverOptions>>().Value;
+            o.Address = new Uri("http://localhost:8000");
         });
         services.AddGrpcClient<CertificateService.CertificateServiceClient>((sp, o) =>
         {
-            var receiverOptions = sp.GetService<IOptions<ReceiverOptions>>()?.Value;
-            o.Address = receiverOptions?.ControllerUrl;
+            var receiverOptions = sp.GetRequiredService<IOptions<ReceiverOptions>>().Value;
+            o.Address = new Uri("http://localhost:8000");
         });
         return services;
     }

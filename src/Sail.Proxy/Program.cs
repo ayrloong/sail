@@ -16,10 +16,9 @@ builder.Services.AddControllerRuntime();
 builder.Services.AddReverseProxy().LoadFromMessages()
     .AddServiceDiscoveryDestinationResolver();
 
-var consulOptions = builder.Configuration.Get<ConsulOptions>();
 builder.Services.AddConsul(o =>
 {
-    o.Address = new Uri(consulOptions?.Address);
+    o.Address = new Uri("http://127.0.0.1:8500");
 });
 
 var app = builder.Build();

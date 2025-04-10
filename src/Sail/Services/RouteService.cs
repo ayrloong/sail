@@ -40,6 +40,7 @@ public class RouteService(SailContext context)
             .Set(x => x.TimeoutPolicy, request.TimeoutPolicy)
             .Set(x => x.Timeout, request.Timeout)
             .Set(x => x.MaxRequestBodySize, request.MaxRequestBodySize)
+            .Set(x=>x.Transforms,request.Transforms)
             .Set(x => x.UpdatedAt, DateTimeOffset.UtcNow);
 
         await context.Routes.FindOneAndUpdateAsync(filter, update, cancellationToken: cancellationToken);
@@ -67,6 +68,7 @@ public class RouteService(SailContext context)
             TimeoutPolicy = request.TimeoutPolicy,
             Timeout = request.Timeout,
             MaxRequestBodySize = request.MaxRequestBodySize,
+            Transforms = request.Transforms
         };
         return route;
     }
@@ -140,6 +142,7 @@ public class RouteService(SailContext context)
             TimeoutPolicy = route.TimeoutPolicy,
             Timeout = route.Timeout,
             MaxRequestBodySize = route.MaxRequestBodySize,
+            Transforms = route.Transforms,
             CreatedAt = route.CreatedAt,
             UpdatedAt = route.UpdatedAt
         };

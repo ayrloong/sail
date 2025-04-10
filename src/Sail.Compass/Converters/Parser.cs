@@ -14,28 +14,80 @@ internal class Parser(IClusterDestinationsUpdater destinationsUpdater)
         throw new NotImplementedException();
     }
 
-    public async ValueTask ConvertFromDataSourceAsync(DataSourceContext dataSourceContext,
+    public void ConvertFromDataSource(DataSourceContext dataSourceContext,
         YarpConfigContext configContext, CancellationToken cancellationToken)
     {
         foreach (var route in dataSourceContext.Routes)
         {
-            await HandleRouteAsyncCore(configContext, route, cancellationToken);
+            HandleRoute(configContext, route);
         }
 
         foreach (var cluster in dataSourceContext.Clusters)
         {
-            await HandleClusterAsyncCore(configContext, cluster, cancellationToken);
+            HandleCluster(configContext, cluster);
         }
     }
 
-    ValueTask HandleClusterAsyncCore(YarpConfigContext configContext, Cluster cluster,
-        CancellationToken cancellationToken)
+    private void HandleCluster(YarpConfigContext configContext, Cluster cluster)
     {
         var clusters = configContext.Clusters;
         var clusterConfig = new ClusterConfig
         {
             ClusterId = cluster.ClusterId,
             LoadBalancingPolicy = cluster.LoadBalancingPolicy,
+            HealthCheck = new HealthCheckConfig
+            {
+                AvailableDestinationsPolicy = cluster.HealthCheck?.AvailableDestinationsPolicy,
+                Active = new ActiveHealthCheckConfig
+                {
+                    Enabled = cluster.HealthCheck?.Active?.Enabled,
+                    Interval = TimeSpan.TryParse(cluster.HealthCheck?.Active?.Interval, CultureInfo.InvariantCulture,
+                        out var interval)
+                        ? interval
+                        : null,
+                    Timeout = TimeSpan.TryParse(cluster.HealthCheck?.Active?.Timeout, CultureInfo.InvariantCulture,
+                        out var timeout)
+                        ? timeout
+                        : null,
+                    Policy = cluster.HealthCheck?.Active?.Policy,
+                    Path = cluster.HealthCheck?.Active?.Path,
+                    Query = cluster.HealthCheck?.Active?.Query
+                },
+                Passive = new PassiveHealthCheckConfig
+                {
+                    Enabled = cluster.HealthCheck?.Passive?.Enabled,
+                    Policy = cluster.HealthCheck?.Passive?.Policy,
+                    ReactivationPeriod = TimeSpan.TryParse(cluster.HealthCheck?.Passive?.ReactivationPeriod,
+                        CultureInfo.InvariantCulture,
+                        out var reactivationPeriod)
+                        ? reactivationPeriod
+                        : null
+                }
+            },
+            SessionAffinity = new SessionAffinityConfig
+            {
+
+                Enabled = cluster.SessionAffinity?.Enabled,
+                Policy = cluster.SessionAffinity?.Policy,
+                FailurePolicy = cluster.SessionAffinity?.FailurePolicy,
+                AffinityKeyName = cluster.SessionAffinity?.AffinityKeyName ?? string.Empty,
+                Cookie = new SessionAffinityCookieConfig
+                {
+                    Path = cluster.SessionAffinity?.Cookie?.Path,
+                    Domain = cluster.SessionAffinity?.Cookie?.Domain,
+                    HttpOnly = cluster.SessionAffinity?.Cookie?.HttpOnly,
+                    Expiration = TimeSpan.TryParse(cluster.SessionAffinity?.Cookie?.Expiration,
+                        CultureInfo.InvariantCulture,
+                        out var expiration)
+                        ? expiration
+                        : null,
+                    MaxAge = TimeSpan.TryParse(cluster.SessionAffinity?.Cookie?.MaxAge, CultureInfo.InvariantCulture,
+                        out var maxAge)
+                        ? maxAge
+                        : null,
+                    IsEssential = cluster.SessionAffinity?.Cookie?.IsEssential
+                }
+            },
             Destinations = cluster.Destinations?.ToDictionary(x => x.DestinationId, x => new DestinationConfig
             {
                 Host = x.Host,
@@ -43,7 +95,7 @@ internal class Parser(IClusterDestinationsUpdater destinationsUpdater)
                 Address = x.Address
             })
         };
-        
+
         if (cluster.EnabledServiceDiscovery)
         {
             clusterConfig = clusterConfig with
@@ -62,10 +114,9 @@ internal class Parser(IClusterDestinationsUpdater destinationsUpdater)
         }
 
         clusters.Add(clusterConfig);
-        return ValueTask.CompletedTask;
     }
 
-    ValueTask HandleRouteAsyncCore(YarpConfigContext configContext, Route route, CancellationToken cancellationToken)
+    private void HandleRoute(YarpConfigContext configContext, Route route)
     {
         var routes = configContext.Routes;
 
@@ -99,9 +150,9 @@ internal class Parser(IClusterDestinationsUpdater destinationsUpdater)
             TimeoutPolicy = route.TimeoutPolicy,
             CorsPolicy = route.CorsPolicy,
             MaxRequestBodySize = route.MaxRequestBodySize,
+            Transforms = route.Transforms.Select(x => x.Properties).ToList(),
             Order = route.Order
         };
         routes.Add(routeConfig);
-        return ValueTask.CompletedTask;
     }
 }

@@ -31,6 +31,11 @@ message Route {
   google.protobuf.StringValue timeout_policy = 8;
   google.protobuf.StringValue timeout = 9;
   google.protobuf.Int64Value max_request_body_size = 10;
+  repeated RouteTransform transforms = 11;
+}
+
+message RouteTransform {
+  map<string, string> properties = 1;
 }
 
 message RouteMatch {

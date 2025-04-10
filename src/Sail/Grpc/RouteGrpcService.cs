@@ -109,7 +109,19 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
             TimeoutPolicy = route.TimeoutPolicy,
             AuthorizationPolicy = route.AuthorizationPolicy,
             MaxRequestBodySize = route.MaxRequestBodySize,
+            Transforms = { route.Transforms?.Select(MapToRouteTransform) ?? [] },
             RateLimiterPolicy = route.RateLimiterPolicy
         };
+    }
+
+    private static RouteTransform MapToRouteTransform(IReadOnlyDictionary<string, string> transform)
+    {
+        var result = new RouteTransform();
+        foreach (var item in transform)
+        {
+            result.Properties[item.Key] = item.Value;
+        }
+
+        return result;
     }
 }
