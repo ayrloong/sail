@@ -27,7 +27,7 @@ public class ClusterGrpcService(SailContext dbContext, IClusterStore clusterStor
     {
         var options = new ChangeStreamOptions
         {
-            FullDocument = ChangeStreamFullDocumentOption.Default,
+            FullDocument = ChangeStreamFullDocumentOption.Required,
             FullDocumentBeforeChange = ChangeStreamFullDocumentBeforeChangeOption.Required
         };
 
@@ -80,6 +80,25 @@ public class ClusterGrpcService(SailContext dbContext, IClusterStore clusterStor
             ServiceName = cluster.ServiceName,
             EnabledServiceDiscovery = IsServiceDiscoveryEnabled(cluster.ServiceName, cluster.ServiceDiscoveryType),
             LoadBalancingPolicy = cluster.LoadBalancingPolicy,
+            HealthCheck = new ClusterHealthCheck
+            {
+                AvailableDestinationsPolicy = cluster.HealthCheck?.AvailableDestinationsPolicy,
+                Active = new ClusterHealthCheck.Types.ActiveHealthCheck
+                {
+                    Enabled = cluster.HealthCheck?.Active?.Enabled ?? false,
+                    Interval = cluster.HealthCheck?.Active?.Interval?.ToString(),
+                    Timeout = cluster.HealthCheck?.Active?.Timeout?.ToString(),
+                    Policy = cluster.HealthCheck?.Active?.Policy,
+                    Path = cluster.HealthCheck?.Active?.Path,
+                    Query = cluster.HealthCheck?.Active?.Query
+                },
+                Passive = new ClusterHealthCheck.Types.PassiveHealthCheck
+                {
+                    Enabled = cluster.HealthCheck?.Passive?.Enabled ?? false,
+                    Policy = cluster.HealthCheck?.Passive?.Policy,
+                    ReactivationPeriod = cluster.HealthCheck?.Passive?.ReactivationPeriod?.ToString()
+                }
+            },
             Destinations =
             {
                 cluster.Destinations?.Select(d => new Destination

@@ -11,7 +11,7 @@ public class RouteService(SailContext context)
 {
     public async Task<IEnumerable<RouteResponse>> GetAsync(string? keywords,CancellationToken cancellationToken = default)
     {
-        var filter = Builders<Route>.Filter.Where(route => route.Name.Contains(keywords));
+        var filter = Builders<Route>.Filter.Empty;
         var routes = await context.Routes.FindAsync(filter, cancellationToken: cancellationToken);
         var items = await routes.ToListAsync(cancellationToken: cancellationToken);
         return items.Select(MapToRoute);

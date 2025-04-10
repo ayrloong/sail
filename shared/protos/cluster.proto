@@ -2,6 +2,7 @@ syntax = "proto3";
 import "destination.proto";
 import "common.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 package sail.api.v1;
 
@@ -21,9 +22,9 @@ message WatchClusterResponse{
 
 message Cluster {
   string cluster_id = 1;
-  string  service_name = 2;
+  google.protobuf.StringValue  service_name = 2;
   bool  enabled_service_discovery = 3;
-  string load_balancing_policy = 4;
+  google.protobuf.StringValue load_balancing_policy = 4;
   ClusterSessionAffinity session_affinity = 5;
   ClusterHealthCheck health_check = 6;
   repeated Destination destinations = 7;
@@ -58,19 +59,20 @@ enum SameSiteMode {
 message ClusterHealthCheck {
   PassiveHealthCheck passive = 1;
   ActiveHealthCheck active = 2;
-  string  available_destinations_policy = 3;
+  google.protobuf.StringValue  available_destinations_policy = 3;
 
   message PassiveHealthCheck {
     bool enabled = 1;
-    string policy = 2;
-    int32 reactivation_period = 3;
+    google.protobuf.StringValue policy = 2;
+    google.protobuf.StringValue reactivation_period = 3;
   }
 
   message ActiveHealthCheck {
     bool enabled = 1;
-    int32 interval = 2;
-    int32 timeout = 3;
-    string policy = 4;
-    string path = 5;
+    google.protobuf.StringValue interval = 2;
+    google.protobuf.StringValue timeout = 3;
+    google.protobuf.StringValue policy = 4;
+    google.protobuf.StringValue path = 5;
+    google.protobuf.StringValue query = 6;
   }
 }

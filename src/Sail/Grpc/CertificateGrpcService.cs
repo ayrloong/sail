@@ -25,7 +25,7 @@ public class CertificateGrpcService(SailContext dbContext, ICertificateStore cer
     {
         var options = new ChangeStreamOptions
         {
-            FullDocument = ChangeStreamFullDocumentOption.Default,
+            FullDocument = ChangeStreamFullDocumentOption.Required,
             FullDocumentBeforeChange = ChangeStreamFullDocumentBeforeChangeOption.Required
         };
 
