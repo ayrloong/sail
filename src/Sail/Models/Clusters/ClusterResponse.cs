@@ -10,6 +10,7 @@ public record ClusterResponse
     public ServiceDiscoveryType? ServiceDiscoveryType { get; init; }
     public string? LoadBalancingPolicy { get; init; }
     public HealthCheckResponse? HealthCheck { get; init; }
+    public SessionAffinityResponse? SessionAffinity { get; set; }
     public IEnumerable<DestinationResponse>? Destinations { get; init; }
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset UpdatedAt { get; init; }

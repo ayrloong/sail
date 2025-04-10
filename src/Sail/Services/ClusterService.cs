@@ -35,31 +35,9 @@ public class ClusterService(SailContext context)
             .Set(x => x.ServiceName, request.ServiceName)
             .Set(x => x.ServiceDiscoveryType, request.ServiceDiscoveryType)
             .Set(x => x.LoadBalancingPolicy, request.LoadBalancingPolicy)
-            .Set(x => x.Destinations, request.Destinations.Select(item => new Destination
-            {
-                Host = item.Host,
-                Address = item.Address,
-                Health = item.Health
-            }).ToList())
-            .Set(x => x.HealthCheck, new HealthCheck
-            {
-                AvailableDestinationsPolicy = request.HealthCheck?.AvailableDestinationsPolicy,
-                Active = new ActiveHealthCheck
-                {
-                    Enabled = request.HealthCheck?.Active?.Enabled,
-                    Interval = request.HealthCheck?.Active?.Interval,
-                    Timeout = request.HealthCheck?.Active?.Timeout,
-                    Policy = request.HealthCheck?.Active?.Policy,
-                    Path = request.HealthCheck?.Active?.Path,
-                    Query = request.HealthCheck?.Active?.Query
-                },
-                Passive = new PassiveHealthCheck
-                {
-                    Enabled = request.HealthCheck?.Passive?.Enabled,
-                    Policy = request.HealthCheck?.Passive?.Policy,
-                    ReactivationPeriod = request.HealthCheck?.Passive?.ReactivationPeriod,
-                }
-            })
+            .Set(x => x.Destinations, request.Destinations.Select(CreateDestinationFromRequest).ToList())
+            .Set(x => x.HealthCheck, CreateHealthCheckFromRequest(request.HealthCheck))
+            .Set(x => x.SessionAffinity, CreateSessionAffinityFromRequest(request.SessionAffinity))
             .Set(x => x.UpdatedAt, DateTimeOffset.UtcNow);
 
         await context.Clusters.FindOneAndUpdateAsync(filter, update, cancellationToken: cancellationToken);
@@ -81,33 +59,67 @@ public class ClusterService(SailContext context)
             LoadBalancingPolicy = request.LoadBalancingPolicy,
             ServiceName = request.ServiceName,
             ServiceDiscoveryType = request.ServiceDiscoveryType,
-            HealthCheck = new HealthCheck
-            {
-                AvailableDestinationsPolicy = request.HealthCheck?.AvailableDestinationsPolicy,
-                Active = new ActiveHealthCheck
-                {
-                    Enabled = request.HealthCheck?.Active?.Enabled,
-                    Interval = request.HealthCheck?.Active?.Interval,
-                    Timeout = request.HealthCheck?.Active?.Timeout,
-                    Policy = request.HealthCheck?.Active?.Policy,
-                    Path = request.HealthCheck?.Active?.Path,
-                    Query = request.HealthCheck?.Active?.Query
-                },
-                Passive = new PassiveHealthCheck
-                {
-                    Enabled = request.HealthCheck?.Passive?.Enabled,
-                    Policy = request.HealthCheck?.Passive?.Policy,
-                    ReactivationPeriod = request.HealthCheck?.Passive?.ReactivationPeriod,
-                }
-            },
-            Destinations = request.Destinations.Select(item => new Destination
-            {
-                Host = item.Host,
-                Address = item.Address,
-                Health = item.Health
-            }).ToList()
+            HealthCheck = CreateHealthCheckFromRequest(request.HealthCheck),
+            SessionAffinity = CreateSessionAffinityFromRequest(request.SessionAffinity),
+            Destinations = request.Destinations.Select(CreateDestinationFromRequest).ToList()
         };
         return cluster;
+    }
+
+    private HealthCheck CreateHealthCheckFromRequest(HealthCheckRequest? healthCheck)
+    {
+        return new HealthCheck
+        {
+            AvailableDestinationsPolicy = healthCheck?.AvailableDestinationsPolicy,
+            Active = new ActiveHealthCheck
+            {
+                Enabled = healthCheck?.Active?.Enabled,
+                Interval = healthCheck?.Active?.Interval,
+                Timeout = healthCheck?.Active?.Timeout,
+                Policy = healthCheck?.Active?.Policy,
+                Path = healthCheck?.Active?.Path,
+                Query = healthCheck?.Active?.Query
+            },
+            Passive = new PassiveHealthCheck
+            {
+                Enabled = healthCheck?.Passive?.Enabled,
+                Policy = healthCheck?.Passive?.Policy,
+                ReactivationPeriod = healthCheck?.Passive?.ReactivationPeriod,
+            }
+        };
+    }
+
+    private SessionAffinity CreateSessionAffinityFromRequest(SessionAffinityRequest? sessionAffinity)
+    {
+        return new SessionAffinity
+        {
+            Enabled = sessionAffinity?.Enabled,
+            Policy = sessionAffinity?.FailurePolicy,
+            FailurePolicy = sessionAffinity?.FailurePolicy,
+            AffinityKeyName = sessionAffinity?.AffinityKeyName,
+            Cookie = new SessionAffinityCookie
+            {
+                Path = sessionAffinity?.Cookie?.Path,
+                Domain = sessionAffinity?.Cookie?.Domain,
+                HttpOnly = sessionAffinity?.Cookie?.HttpOnly,
+                SecurePolicy = sessionAffinity?.Cookie?.SecurePolicy,
+                SameSite = sessionAffinity?.Cookie?.SameSite,
+                Expiration = sessionAffinity?.Cookie?.Expiration,
+                MaxAge = sessionAffinity?.Cookie?.MaxAge,
+                IsEssential = sessionAffinity?.Cookie?.IsEssential
+            }
+        };
+    }
+
+    private Destination CreateDestinationFromRequest(DestinationRequest request)
+    {
+        return new Destination
+        {
+            Id = Guid.NewGuid(),
+            Host = request.Host,
+            Address = request.Address,
+            Health = request.Health
+        };
     }
 
     private ClusterResponse MapToCluster(Cluster cluster)
@@ -138,8 +150,27 @@ public class ClusterService(SailContext context)
                     ReactivationPeriod = cluster.HealthCheck?.Passive?.ReactivationPeriod,
                 }
             },
+            SessionAffinity = new SessionAffinityResponse
+            {
+                Enabled = cluster.SessionAffinity?.Enabled,
+                Policy = cluster.SessionAffinity?.FailurePolicy,
+                FailurePolicy = cluster.SessionAffinity?.FailurePolicy,
+                AffinityKeyName =cluster.SessionAffinity?.AffinityKeyName,
+                Cookie = new SessionAffinityCookieResponse
+                {
+                    Path = cluster.SessionAffinity?.Cookie?.Path,
+                    Domain = cluster.SessionAffinity?.Cookie?.Domain,
+                    HttpOnly = cluster.SessionAffinity?.Cookie?.HttpOnly,
+                    SecurePolicy = cluster.SessionAffinity?.Cookie?.SecurePolicy,
+                    SameSite = cluster.SessionAffinity?.Cookie?.SameSite,
+                    Expiration = cluster.SessionAffinity?.Cookie?.Expiration,
+                    MaxAge = cluster.SessionAffinity?.Cookie?.MaxAge,
+                    IsEssential = cluster.SessionAffinity?.Cookie?.IsEssential
+                }
+            },
             Destinations = cluster.Destinations?.Select(d => new DestinationResponse
             {
+                Id = d.Id,
                 Host = d.Host,
                 Address = d.Address,
                 Health = d.Health

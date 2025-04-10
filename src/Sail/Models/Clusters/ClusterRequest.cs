@@ -7,5 +7,6 @@ public record ClusterRequest(
     string ServiceName,
     ServiceDiscoveryType? ServiceDiscoveryType,
     HealthCheckRequest? HealthCheck,
+    SessionAffinityRequest? SessionAffinity,
     string LoadBalancingPolicy,
     List<DestinationRequest> Destinations);

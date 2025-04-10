@@ -28,6 +28,22 @@ Content-Type: application/json
       "reactivationPeriod": "00:02:00"
     }
   },
+  "sessionAffinity": {
+    "enabled": true,
+    "policy": "CustomHeader",
+    "failurePolicy": "Return503Error",
+    "affinityKeyName": "Key1",
+    "cookie": {
+      "domain": "localhost",
+      "expiration": "03:00:00",
+      "httpOnly": true,
+      "isEssential": true,
+      "maxAge": "1.00:00:00",
+      "path": "mypath",
+      "sameSite": 1,
+      "securePolicy":2
+    }
+  },
   "destinations": [
     {
       "address": "https://example.com/"

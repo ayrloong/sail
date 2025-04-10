@@ -43,7 +43,7 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
 
                 var eventType = changeStreamDocument.OperationType switch
                 {
-                    ChangeStreamOperationType.Create => EventType.Create,
+                    ChangeStreamOperationType.Insert => EventType.Create,
                     ChangeStreamOperationType.Update => EventType.Update,
                     ChangeStreamOperationType.Delete => EventType.Delete,
                     _ => EventType.Unknown

@@ -45,7 +45,7 @@ public class ClusterGrpcService(SailContext dbContext, IClusterStore clusterStor
 
                 var eventType = changeStreamDocument.OperationType switch
                 {
-                    ChangeStreamOperationType.Create => EventType.Create,
+                    ChangeStreamOperationType.Insert => EventType.Create,
                     ChangeStreamOperationType.Update => EventType.Update,
                     ChangeStreamOperationType.Delete => EventType.Delete,
                     _ => EventType.Unknown
@@ -99,10 +99,27 @@ public class ClusterGrpcService(SailContext dbContext, IClusterStore clusterStor
                     ReactivationPeriod = cluster.HealthCheck?.Passive?.ReactivationPeriod?.ToString()
                 }
             },
+            SessionAffinity = new ClusterSessionAffinity
+            {
+                Enabled = cluster.SessionAffinity?.Enabled ?? false,
+                Policy = cluster.SessionAffinity?.Policy,
+                FailurePolicy = cluster.SessionAffinity?.FailurePolicy,
+                AffinityKeyName = cluster.SessionAffinity?.AffinityKeyName,
+                Cookie = new ClusterSessionAffinity.Types.SessionAffinityCookie
+                {
+                    Path = cluster.SessionAffinity?.Cookie?.Path,
+                    Domain = cluster.SessionAffinity?.Cookie?.Domain,
+                    HttpOnly = cluster.SessionAffinity?.Cookie?.HttpOnly ?? false,
+                    Expiration = cluster.SessionAffinity?.Cookie?.Expiration?.ToString(),
+                    MaxAge = cluster.SessionAffinity?.Cookie?.MaxAge?.ToString(),
+                    IsEssential = cluster.SessionAffinity?.Cookie?.IsEssential ?? false
+                }
+            },
             Destinations =
             {
                 cluster.Destinations?.Select(d => new Destination
                 {
+                    DestinationId = d.Id.ToString(),
                     Address = d.Address,
                     Health = d.Health,
                     Host = d.Host

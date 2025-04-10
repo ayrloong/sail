@@ -37,5 +37,4 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<SailContext>();
     await context.InitializeAsync();
 }
-
 await app.RunAsync();
