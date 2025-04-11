@@ -94,7 +94,7 @@ public class ClusterService(SailContext context)
         return new SessionAffinity
         {
             Enabled = sessionAffinity?.Enabled,
-            Policy = sessionAffinity?.FailurePolicy,
+            Policy = sessionAffinity?.Policy,
             FailurePolicy = sessionAffinity?.FailurePolicy,
             AffinityKeyName = sessionAffinity?.AffinityKeyName,
             Cookie = new SessionAffinityCookie
@@ -153,7 +153,7 @@ public class ClusterService(SailContext context)
             SessionAffinity = new SessionAffinityResponse
             {
                 Enabled = cluster.SessionAffinity?.Enabled,
-                Policy = cluster.SessionAffinity?.FailurePolicy,
+                Policy = cluster.SessionAffinity?.Policy,
                 FailurePolicy = cluster.SessionAffinity?.FailurePolicy,
                 AffinityKeyName =cluster.SessionAffinity?.AffinityKeyName,
                 Cookie = new SessionAffinityCookieResponse
