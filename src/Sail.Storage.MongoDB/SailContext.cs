@@ -70,7 +70,17 @@ public class SailContext
         
         if (!BsonClassMap.IsClassMapRegistered(typeof(Certificate)))
         {
-            BsonClassMap.RegisterClassMap<Certificate  >(classMap =>
+            BsonClassMap.RegisterClassMap<Certificate>(classMap =>
+            {
+                classMap.AutoMap();
+                classMap.MapIdMember(x => x.Id)
+                    .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
+            });
+        }
+        
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Destination)))
+        {
+            BsonClassMap.RegisterClassMap<Destination>(classMap =>
             {
                 classMap.AutoMap();
                 classMap.MapIdMember(x => x.Id)

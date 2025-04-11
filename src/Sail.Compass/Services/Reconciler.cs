@@ -14,8 +14,7 @@ internal class Reconciler(ICache cache, Parser parser, IUpdateConfig updateConfi
         var routes = cache.GetRoutes();
         var context = new DataSourceContext(clusters, routes);
 
-        await parser.ConvertFromDataSourceAsync(context, configContext, cancellationToken);
-        
+        parser.ConvertFromDataSource(context, configContext, cancellationToken);
         await updateConfig.UpdateAsync(configContext.Routes, configContext.Clusters,
             cancellationToken);
     }

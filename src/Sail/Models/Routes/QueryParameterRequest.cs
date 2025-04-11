@@ -1,6 +1,6 @@
 using Sail.Core.Entities;
 
-namespace Sail.Models.Route;
+namespace Sail.Models.Routes;
 
 public record QueryParameterRequest(
     string Name,

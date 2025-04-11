@@ -24,7 +24,7 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
     {
         var options = new ChangeStreamOptions
         {
-            FullDocument = ChangeStreamFullDocumentOption.Default,
+            FullDocument = ChangeStreamFullDocumentOption.Required,
             FullDocumentBeforeChange = ChangeStreamFullDocumentBeforeChangeOption.Required
         };
 
@@ -43,7 +43,7 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
 
                 var eventType = changeStreamDocument.OperationType switch
                 {
-                    ChangeStreamOperationType.Create => EventType.Create,
+                    ChangeStreamOperationType.Insert => EventType.Create,
                     ChangeStreamOperationType.Update => EventType.Update,
                     ChangeStreamOperationType.Delete => EventType.Delete,
                     _ => EventType.Unknown
@@ -73,22 +73,55 @@ public class RouteGrpcService(SailContext dbContext, IRouteStore routeStore) : R
 
     private static RouteResponse MapToRouteResponse(Route route)
     {
-        var match = route.Match;
         return new RouteResponse
         {
             RouteId = route.Id.ToString(),
             Match = new RouteMatch
             {
-                Path = match.Path
+                Path = route.Match.Path,
+                Hosts = { route.Match.Hosts },
+                Methods = { route.Match.Methods },
+                Headers =
+                {
+                    route.Match.Headers.Select(h => new RouteMatch.Types.RouteHeader
+                    {
+                        Name = h.Name,
+                        Mode = (RouteMatch.Types.RouteHeader.Types.HeaderMatchMode)h.Mode,
+                        Values = { h.Values ?? [] },
+                        IsCaseSensitive = h.IsCaseSensitive
+                    })
+                },
+                QueryParameters =
+                {
+                    route.Match.QueryParameters.Select(q => new RouteMatch.Types.RouteQueryParameter
+                    {
+                        Name = q.Name,
+                        Mode = (RouteMatch.Types.RouteQueryParameter.Types.QueryParameterMatchMode)q.Mode,
+                        Values = { q.Values ?? [] },
+                        IsCaseSensitive = q.IsCaseSensitive
+                    })
+                }
             },
             Order = route.Order,
             ClusterId = route.ClusterId?.ToString(),
             CorsPolicy = route.CorsPolicy,
-            Timeout = route.Timeout?.ToString("hh:mm:ss"),
+            Timeout = route.Timeout?.ToString(),
             TimeoutPolicy = route.TimeoutPolicy,
             AuthorizationPolicy = route.AuthorizationPolicy,
             MaxRequestBodySize = route.MaxRequestBodySize,
+            Transforms = { route.Transforms?.Select(MapToRouteTransform) ?? [] },
             RateLimiterPolicy = route.RateLimiterPolicy
         };
+    }
+
+    private static RouteTransform MapToRouteTransform(IReadOnlyDictionary<string, string> transform)
+    {
+        var result = new RouteTransform();
+        foreach (var item in transform)
+        {
+            result.Properties[item.Key] = item.Value;
+        }
+
+        return result;
     }
 }

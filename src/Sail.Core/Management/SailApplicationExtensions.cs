@@ -14,7 +14,9 @@ public static class SailApplicationExtensions
 
     private static void AddConfiguration(this IServiceCollection services)
     {
-        services.AddOptions<DatabaseOptions>(nameof(DatabaseOptions.Name));
-        services.AddOptions<CertificateOptions>(nameof(CertificateOptions.Name));
+        services.AddOptions<DatabaseOptions>().BindConfiguration(nameof(DatabaseOptions.Name));
+        services.AddOptions<CertificateOptions>().BindConfiguration(nameof(CertificateOptions.Name));
+        services.AddOptions<ConsulOptions>().BindConfiguration(nameof(ConsulOptions.Name));
+        services.AddOptions<ReceiverOptions>().BindConfiguration(nameof(ReceiverOptions.Name));
     }
 }

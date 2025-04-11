@@ -38,13 +38,7 @@ internal sealed  class ConsulServiceEndpointProvider(
                 endpoints.Add(serviceEndpoint);
             }
         }
-
-        if (endpoints.Count == 0)
-        {
-            throw new InvalidOperationException(
-                $"No records were found for service '{ServiceName}' ( name: '{hostName}').");
-        }
-
+        
         SetResult(endpoints, ttl);
     }
 }
