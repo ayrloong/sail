@@ -64,7 +64,8 @@ public static class CertificateApi
         );
     }
 
-    private static async Task<Results<Ok<IEnumerable<CertificateResponse>>, NotFound>> GetItems(CertificateService service,
+    private static async Task<Results<Ok<IEnumerable<CertificateResponse>>, NotFound>> GetItems(
+        CertificateService service,
         CancellationToken cancellationToken)
     {
         var items = await service.GetAsync(cancellationToken);
@@ -88,7 +89,7 @@ public static class CertificateApi
         var result = await service.UpdateAsync(id, request, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            updated => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }
@@ -99,7 +100,7 @@ public static class CertificateApi
         var result = await service.DeleteAsync(id, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            deleted => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }

@@ -11,7 +11,7 @@ public class ClusterService(SailContext context)
     public async Task<IEnumerable<ClusterResponse>> GetAsync(string keywords,
         CancellationToken cancellationToken = default)
     {
-        var filter = Builders<Cluster>.Filter.Where(cluster => cluster.Name != null && cluster.Name.Contains(keywords));
+        var filter = Builders<Cluster>.Filter.Empty;
         var routes = await context.Clusters.FindAsync(filter, cancellationToken: cancellationToken);
         var items = await routes.ToListAsync(cancellationToken: cancellationToken);
         return items.Select(MapToCluster);

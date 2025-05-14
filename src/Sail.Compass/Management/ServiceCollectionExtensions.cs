@@ -12,6 +12,7 @@ using Sail.Core.Certificates;
 using Sail.Core.ConfigProvider;
 using Sail.Core.Options;
 using Yarp.ReverseProxy.Configuration;
+using CertificateService = Sail.Compass.Services.CertificateService;
 
 namespace Sail.Compass.Management;
 
@@ -24,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ICache, DefaultCache>();
         services.AddTransient<IReconciler, Reconciler>();
         services.AddHostedService<ProxyDiscoveryService>();
+        services.AddHostedService<CertificateService>();
         services.RegisterResourceInformer<Route, V1RouteResourceInformer>();
         services.RegisterResourceInformer<Cluster, V1ClusterResourceInformer>();
         services.RegisterResourceInformer<Certificate, V1CertificateResourceInformer>();
@@ -43,11 +45,7 @@ public static class ServiceCollectionExtensions
             var receiverOptions = sp.GetRequiredService<IOptions<ReceiverOptions>>().Value;
             o.Address = new Uri("http://localhost:8000");
         });
-        services.AddGrpcClient<CertificateService.CertificateServiceClient>((sp, o) =>
-        {
-            var receiverOptions = sp.GetRequiredService<IOptions<ReceiverOptions>>().Value;
-            o.Address = new Uri("http://localhost:8000");
-        });
+   
         return services;
     }
 

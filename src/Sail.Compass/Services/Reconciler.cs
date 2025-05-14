@@ -1,4 +1,3 @@
-using Sail.Api.V1;
 using Sail.Compass.Caching;
 using Sail.Compass.Converters;
 using Sail.Core.ConfigProvider;
@@ -7,7 +6,7 @@ namespace Sail.Compass.Services;
 
 internal class Reconciler(ICache cache, Parser parser, IUpdateConfig updateConfig) : IReconciler
 {
-    public async Task ProcessAsync(CancellationToken cancellationToken)
+    public async Task ProcessProxyAsync(CancellationToken cancellationToken)
     {
         var configContext = new YarpConfigContext();
         var clusters = cache.GetClusters();
@@ -17,5 +16,10 @@ internal class Reconciler(ICache cache, Parser parser, IUpdateConfig updateConfi
         parser.ConvertFromDataSource(context, configContext, cancellationToken);
         await updateConfig.UpdateAsync(configContext.Routes, configContext.Clusters,
             cancellationToken);
+    }
+    
+    public Task ProcessCertificateAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

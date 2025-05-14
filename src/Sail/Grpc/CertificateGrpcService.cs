@@ -77,7 +77,7 @@ public class CertificateGrpcService(SailContext dbContext, ICertificateStore cer
             CertificateId = certificate.Id.ToString(),
             Key = certificate.Key,
             Value = certificate.Cert,
-          //  Hosts = { certificate.SNIs.Select(item => item.HostName).ToArray() }
+            Hosts = { certificate.SNIs?.Select(item => item.HostName) ?? [] }
         };
     }
 }

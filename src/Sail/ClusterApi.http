@@ -1,9 +1,9 @@
 @baseUrl = http://localhost:8100
 @apiVersion = 1.0
-@id = 4fd7dc02-c5d9-4fe0-ac8b-74eb18618a83
+@id = 99AD9A58-5155-4327-8B48-88FA21E7D5F8
 
 ### Get all clusters
-GET {{baseUrl}}/api/clusters?keywords=example&api-version={{apiVersion}}
+GET {{baseUrl}}/api/clusters?keywords=&api-version={{apiVersion}}
 Accept: application/json
 
 ### Create the cluster
@@ -56,7 +56,7 @@ PUT {{baseUrl}}/api/clusters/{{id}}?api-version={{apiVersion}}
 Content-Type: application/json
 
 {
-  "name": "example-updater",
+  "name": "example",
   "serviceName": "example",
   "serviceDiscoveryType": 1,
   "destinations": []

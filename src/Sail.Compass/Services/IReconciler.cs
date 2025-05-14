@@ -2,5 +2,6 @@ namespace Sail.Compass.Services;
 
 public interface IReconciler
 {
-    Task ProcessAsync(CancellationToken cancellationToken);
+    Task ProcessProxyAsync(CancellationToken cancellationToken);
+    Task ProcessCertificateAsync(CancellationToken cancellationToken);
 }

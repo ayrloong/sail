@@ -10,7 +10,6 @@ public class CertificateService(SailContext context)
 {
     public async Task<IEnumerable<CertificateResponse>> GetAsync(CancellationToken cancellationToken = default)
     {
-
         var filter = Builders<Certificate>.Filter.Empty;
         var certificates = await context.Certificates.FindAsync(filter, cancellationToken: cancellationToken);
         var items = await certificates.ToListAsync(cancellationToken: cancellationToken);
@@ -62,7 +61,7 @@ public class CertificateService(SailContext context)
             return [];
         }
 
-        return certificate.SNIs.Select(MapToSNI);
+        return certificate.SNIs?.Select(MapToSNI) ?? [];
     }
 
     public async Task<ErrorOr<Created>> CreateSNIAsync(Guid certificateId, SNIRequest request,
