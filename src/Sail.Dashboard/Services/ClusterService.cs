@@ -4,20 +4,20 @@ namespace Sail.Dashboard.Services;
 
 public class ClusterService(DashboardClient client)
 {
-    public Task<List<ClusterResponse>> GetClustersAsync(CancellationToken cancellationToken)
+    public Task<List<ClusterResponse>> ListAsync(CancellationToken cancellationToken)
     {
         return client.HttpClient.GetFromJsonAsync<List<ClusterResponse>>("/api/clusters",
             cancellationToken: cancellationToken)!;
     }
 
-    public async Task CreateClusterAsync(ClusterRequest request, CancellationToken cancellationToken)
+    public async Task CreateAsync(ClusterRequest request, CancellationToken cancellationToken)
     {
         var response =
             await client.HttpClient.PostAsJsonAsync("/api/clusters/", request, cancellationToken: cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task UpdateClusterAsync(Guid id, ClusterRequest request, CancellationToken cancellationToken)
+    public async Task UpdateAsync(Guid id, ClusterRequest request, CancellationToken cancellationToken)
     {
         var response =
             await client.HttpClient.PutAsJsonAsync($"/api/clusters/{id}", request,
@@ -25,7 +25,7 @@ public class ClusterService(DashboardClient client)
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task DeleteClusterAsync(Guid id, CancellationToken cancellationToken)
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
         var response =
             await client.HttpClient.DeleteAsync($"/api/clusters/{id}", cancellationToken: cancellationToken);

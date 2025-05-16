@@ -1,0 +1,78 @@
+@page "/routes/detail"
+
+<div>
+    <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h2 class="text-3xl font-semibold text-gray-800">Route Details</h2>
+                    <p class="text-gray-500 mt-1">Viewing details for route: /api/v1/users</p>
+                </div>
+                <a href="index.html#routesTable" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    Back to Routes
+                </a>
+            </header>
+
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="details-label">Route ID</p>
+                        <p class="details-value">route_1a2b3c4d5e</p>
+                    </div>
+                    <div>
+                        <p class="details-label">Route Path</p>
+                        <p class="details-value">/api/v1/users</p>
+                    </div>
+                    <div>
+                        <p class="details-label">Service Name/ID</p>
+                        <p class="details-value">user-service</p>
+                    </div>
+                    <div>
+                        <p class="details-label">Allowed HTTP Methods</p>
+                        <p class="details-value">
+                            <span class="inline-block bg-teal-100 text-teal-700 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">GET</span>
+                            <span class="inline-block bg-blue-100 text-blue-700 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">POST</span>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="details-label">Created At</p>
+                        <p class="details-value">2025-05-12 10:30:00 UTC</p>
+                    </div>
+                    <div>
+                        <p class="details-label">Last Updated</p>
+                        <p class="details-value">2025-05-13 09:15:00 UTC</p>
+                    </div>
+                     <div>
+                        <p class="details-label">Strip Path</p>
+                        <p class="details-value">True</p>
+                    </div>
+                    <div>
+                        <p class="details-label">Preserve Host</p>
+                        <p class="details-value">False</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3">Associated Plugins</h4>
+                    <ul class="list-disc list-inside text-gray-700 space-y-1">
+                        <li>Rate Limiting (ID: plugin_rl_xyz)</li>
+                        <li>JWT Authentication (ID: plugin_jwt_abc)</li>
+                        <li>Logging (ID: plugin_log_123)</li>
+                    </ul>
+                    <p class="mt-3 text-sm text-gray-500">No plugins associated if list is empty.</p>
+                </div>
+
+                 <div class="mt-8 pt-6 border-t">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3">Service Upstream URL</h4>
+                     <p class="details-value">http://user-service.internal:8080</p>
+                </div>
+
+
+                <div class="mt-8 flex justify-end space-x-3 pt-6 border-t">
+                    <a href="edit_route.html" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Edit Route
+                    </a>
+                    <button type="button" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        Delete Route
+                    </button>
+                </div>
+            </div>
+</div>

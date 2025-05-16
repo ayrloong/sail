@@ -1,0 +1,167 @@
+@page "/routes/form" 
+
+<div>
+            <header class="mb-8">
+                <h2 class="text-3xl font-semibold text-gray-800">Edit Route</h2>
+                <p class="text-gray-500 mt-1">Modify the details of the route.</p>
+            </header>
+
+            <!-- Edit Form -->
+            <div class="bg-white p-6 md:p-10 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+                <form>
+                    <!-- Route Name -->
+                    <div class="mb-8">
+                        <label for="routeName" class="block text-sm font-medium text-gray-700 mb-2">Route Name</label>
+                        <input type="text" name="routeName" id="routeName" value="example-route" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                        <p class="mt-1 text-xs text-gray-500">A descriptive name for this route.</p>
+                    </div>
+
+                    <!-- Cluster ID -->
+                    <div class="mb-8">
+                        <label for="clusterId" class="block text-sm font-medium text-gray-700 mb-2">Cluster ID (Optional)</label>
+                        <input type="text" name="clusterId" id="clusterId" placeholder="e.g., 00000000-0000-0000-0000-000000000000" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                        <p class="mt-1 text-xs text-gray-500">The ID of the cluster this route belongs to.</p>
+                    </div>
+
+                    <!-- Route Path -->
+                    <div class="mb-8">
+                        <label for="routePath" class="block text-sm font-medium text-gray-700 mb-2">Route Path</label>
+                        <input type="text" name="routePath" id="routePath" value="/api/v1/users" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                        <p class="mt-1 text-xs text-gray-500">The public path for this route (e.g., /users). Corresponds to Match.Path.</p>
+                    </div>
+
+                    <!-- HTTP Methods -->
+                    <div class="mb-8">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allowed HTTP Methods</label>
+                        <div class="mt-3 flex flex-wrap gap-x-6 gap-y-3 items-baseline">
+                            <div class="flex items-center">
+                                <input id="methodGet" name="methods" type="checkbox" value="GET" checked class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                <label for="methodGet" class="ml-2 block text-sm text-gray-900">GET</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="methodPost" name="methods" type="checkbox" value="POST" checked class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                <label for="methodPost" class="ml-2 block text-sm text-gray-900">POST</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="methodPut" name="methods" type="checkbox" value="PUT" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                <label for="methodPut" class="ml-2 block text-sm text-gray-900">PUT</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="methodDelete" name="methods" type="checkbox" value="DELETE" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                <label for="methodDelete" class="ml-2 block text-sm text-gray-900">DELETE</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="methodPatch" name="methods" type="checkbox" value="PATCH" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                <label for="methodPatch" class="ml-2 block text-sm text-gray-900">PATCH</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="methodHead" name="methods" type="checkbox" value="HEAD" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                <label for="methodHead" class="ml-2 block text-sm text-gray-900">HEAD</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="methodOptions" name="methods" type="checkbox" value="OPTIONS" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                <label for="methodOptions" class="ml-2 block text-sm text-gray-900">OPTIONS</label>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500">Select HTTP methods allowed for this route. Corresponds to Match.Methods.</p>
+                    </div>
+
+                    <!-- Hosts -->
+                    <div class="mb-8">
+                        <label for="hosts" class="block text-sm font-medium text-gray-700 mb-2">Hosts</label>
+                        <textarea name="hosts" id="hosts" rows="2" class="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" placeholder="example.com, *.example.org"></textarea>
+                        <p class="mt-2 text-xs text-gray-500">Comma-separated list of hostnames to match (e.g., example.com, *.example.com). Corresponds to Match.Hosts.</p>
+                    </div>
+
+                    <!-- Headers Matching Rules -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Header Matching Rules</h4>
+                        <p class="text-sm text-gray-500 mb-4">Define rules for matching request headers. Corresponds to Match.Headers. (JavaScript would be needed to dynamically add more header rules).</p>
+                        <div class="space-y-6 p-6 border border-gray-200 rounded-lg bg-gray-50/50">
+                            <!-- Example Header Rule 1 -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 items-end">
+                                <div>
+                                    <label for="headerName1" class="block text-xs font-medium text-gray-600 mb-1.5">Header Name</label>
+                                    <input type="text" name="headerName1" id="headerName1" placeholder="X-Custom-Header" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                                </div>
+                                <div>
+                                    <label for="headerValues1" class="block text-xs font-medium text-gray-600 mb-1.5">Header Values (comma-sep)</label>
+                                    <input type="text" name="headerValues1" id="headerValues1" placeholder="value1,value2" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                                </div>
+                                <div>
+                                    <label for="headerMode1" class="block text-xs font-medium text-gray-600 mb-1.5">Match Mode</label>
+                                    <select name="headerMode1" id="headerMode1" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                                        <option value="Exact">Exact</option>
+                                        <option value="Prefix">Prefix</option>
+                                        <option value="Exists">Exists</option>
+                                        <option value="Contains">Contains</option>
+                                        <option value="Regex">Regex</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center self-end pb-1.5">
+                                    <input id="headerCaseSensitive1" name="headerCaseSensitive1" type="checkbox" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                    <label for="headerCaseSensitive1" class="ml-2 block text-sm text-gray-900">Case Sensitive</label>
+                                </div>
+                            </div>
+                            <!-- Add button placeholder for dynamic adding -->
+                            <button type="button" class="mt-4 px-4 py-2 border border-dashed border-gray-400 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Header Rule (Requires JS)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Query Parameters Matching Rules -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Query Parameter Matching Rules</h4>
+                        <p class="text-sm text-gray-500 mb-4">Define rules for matching request query parameters. Corresponds to Match.QueryParameters. (JavaScript would be needed to dynamically add more query rules).</p>
+                        <div class="space-y-6 p-6 border border-gray-200 rounded-lg bg-gray-50/50">
+                            <!-- Example Query Parameter Rule 1 -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 items-end">
+                                <div>
+                                    <label for="queryParamName1" class="block text-xs font-medium text-gray-600 mb-1.5">Parameter Name</label>
+                                    <input type="text" name="queryParamName1" id="queryParamName1" placeholder="param_name" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                                </div>
+                                <div>
+                                    <label for="queryParamValues1" class="block text-xs font-medium text-gray-600 mb-1.5">Parameter Values (comma-sep)</label>
+                                    <input type="text" name="queryParamValues1" id="queryParamValues1" placeholder="val1,val2" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                                </div>
+                                <div>
+                                    <label for="queryParamMode1" class="block text-xs font-medium text-gray-600 mb-1.5">Match Mode</label>
+                                    <select name="queryParamMode1" id="queryParamMode1" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                                        <option value="Exact">Exact</option>
+                                        <option value="Prefix">Prefix</option>
+                                        <option value="Exists">Exists</option>
+                                        <option value="Contains">Contains</option>
+                                        <option value="Regex">Regex</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center self-end pb-1.5">
+                                    <input id="queryParamCaseSensitive1" name="queryParamCaseSensitive1" type="checkbox" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
+                                    <label for="queryParamCaseSensitive1" class="ml-2 block text-sm text-gray-900">Case Sensitive</label>
+                                </div>
+                            </div>
+                             <!-- Add button placeholder for dynamic adding -->
+                            <button type="button" class="mt-4 px-4 py-2 border border-dashed border-gray-400 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Query Rule (Requires JS)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end space-x-4 pt-8 border-t mt-10">
+                        <a href="routes_list.html" class="px-5 py-2.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-5 py-2.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+</div>
