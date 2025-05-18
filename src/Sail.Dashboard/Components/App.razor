@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
     <script src="https://cdn.tailwindcss.com"></script>
-    <HeadOutlet/>
+
+    <HeadOutlet @rendermode="@(new InteractiveServerRenderMode(prerender: false))" />
     <style>
         /* Custom scrollbar for a more subtle look - optional */
         ::-webkit-scrollbar {
@@ -34,7 +35,7 @@
 </head>
 
 <body class="bg-gray-100 font-sans text-gray-800">
-<Routes/>
+    <Routes @rendermode="@(new InteractiveServerRenderMode(prerender: false))" />
 <script src="_framework/blazor.web.js"></script>
 </body>
 </html>
