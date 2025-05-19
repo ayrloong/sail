@@ -14,6 +14,7 @@ builder.Services.AddHttpClient<DashboardClient>((_, client) =>
 }).AddApiVersion(1.0);
 
 builder.Services.AddTransient<ClusterService>();
+builder.Services.AddTransient<RouteService>();
 
 var app = builder.Build();
 

@@ -1,5 +1,7 @@
-@page "/routes/{routeId:int}"
+@page "/routes/{routeId:guid}"
 @using Sail.Dashboard.Models.Routes
+@using Sail.Dashboard.Services
+@inject RouteService RouteService
 
 <div>
 @if (Route is not null)
@@ -139,13 +141,18 @@
             </div>
 }
 else
-{
-            <p>Loading route details or route not found...</p>
+{ 
+    <p>Loading route details or route not found...</p>
 }
 </div>
 
 @code {
     
-    public RouteResult? Route { get; set; } = default!;
-    [Parameter] public int RouteId { get; set; }
+    public RouteResult? Route { get; set; }
+    [Parameter] public Guid RouteId { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Route = await RouteService.GetAsync(RouteId, CancellationToken.None);
+    }
 }
