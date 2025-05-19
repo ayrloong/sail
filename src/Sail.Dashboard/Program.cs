@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient<DashboardClient>((sp, client) =>
+builder.Services.AddHttpClient<DashboardClient>((_, client) =>
 {
     client.BaseAddress = new Uri("http://localhost:8100");
 }).AddApiVersion(1.0);
