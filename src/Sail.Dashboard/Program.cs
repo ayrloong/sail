@@ -1,3 +1,4 @@
+using Microsoft.FluentUI.AspNetCore.Components;
 using Sail.Dashboard;
 using Sail.Dashboard.Components;
 using Sail.Dashboard.Services;
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddFluentUIComponents();
 
 builder.Services.AddHttpClient<DashboardClient>((_, client) =>
 {

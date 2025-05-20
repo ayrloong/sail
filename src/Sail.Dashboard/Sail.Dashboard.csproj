@@ -8,10 +8,10 @@
 
     <ItemGroup>
         <PackageReference Include="Asp.Versioning.Http.Client" />
+        <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" />
     </ItemGroup>
     
     <ItemGroup>
-      <Folder Include="Components\Shared\" />
       <Folder Include="wwwroot\" />
     </ItemGroup>
 </Project>

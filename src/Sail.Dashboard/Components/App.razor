@@ -5,7 +5,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css" rel="stylesheet" />
 
     <HeadOutlet @rendermode="@(new InteractiveServerRenderMode(prerender: false))" />
     <style>
@@ -36,6 +36,8 @@
 
 <body class="bg-gray-100 font-sans text-gray-800">
     <Routes @rendermode="@(new InteractiveServerRenderMode(prerender: false))" />
-<script src="_framework/blazor.web.js"></script>
+    <script src="_framework/blazor.web.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="_content/Microsoft.FluentUI.AspNetCore.Components/Microsoft.FluentUI.AspNetCore.Components.lib.module.js" type="module" async></script>
 </body>
 </html>
