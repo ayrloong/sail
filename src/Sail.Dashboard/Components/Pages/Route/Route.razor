@@ -57,7 +57,7 @@
                                 @foreach (var route in Routes)
                                 {
                                     <tr class="@(Routes.LastOrDefault() == route ? "hover:bg-gray-50" : "border-b hover:bg-gray-50")" @key="route.Id">
-                                        <td class="py-3 px-4"><a href="/route-details-blazor/@route.Id" class="text-blue-600 hover:underline">@route.Match.Path</a></td>
+                                        <td class="py-3 px-4"><a href="/routes/@route.Id" class="text-blue-600 hover:underline">@route.Match.Path</a></td>
                                         <td class="py-3 px-4">@route.Name</td>
                                         <td class="py-3 px-4">
                                             @if (route.Match.Methods is not null && route.Match.Methods.Any())
