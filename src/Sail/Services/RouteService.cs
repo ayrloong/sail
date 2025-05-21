@@ -9,6 +9,16 @@ namespace Sail.Services;
 
 public class RouteService(SailContext context)
 {
+    
+    public async Task<RouteResponse> FindAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Route>.Filter.Where(x => x.Id == id);
+        var routes = await context.Routes.FindAsync(filter, cancellationToken: cancellationToken);
+        var result = await routes.SingleOrDefaultAsync(cancellationToken: cancellationToken);
+        return MapToRoute(result);
+    }
+
+    
     public async Task<IEnumerable<RouteResponse>> GetAsync(string? keywords,
         CancellationToken cancellationToken = default)
     {

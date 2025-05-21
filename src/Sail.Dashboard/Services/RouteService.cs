@@ -9,7 +9,7 @@ public class RouteService(DashboardClient client)
         return client.HttpClient.GetFromJsonAsync<List<RouteResult>>("/api/routes",
             cancellationToken: cancellationToken)!;
     }
-    public Task<RouteResult> GetAsync(Guid id, CancellationToken cancellationToken)
+    public Task<RouteResult> GetAsync(string id, CancellationToken cancellationToken)
     {
         return client.HttpClient.GetFromJsonAsync<RouteResult>($"/api/routes/{id}",
             cancellationToken: cancellationToken)!;
@@ -20,7 +20,7 @@ public class RouteService(DashboardClient client)
             await client.HttpClient.PostAsJsonAsync("/api/routes/", request, cancellationToken: cancellationToken);
         response.EnsureSuccessStatusCode();
     }
-    public async Task UpdateAsync(Guid id, RouteRequest request, CancellationToken cancellationToken)
+    public async Task UpdateAsync(string id, RouteRequest request, CancellationToken cancellationToken)
     {
         var response =
             await client.HttpClient.PutAsJsonAsync($"/api/routes/{id}", request,

@@ -1,6 +1,8 @@
 @using Sail.Dashboard.Models.Routes;
+@using Sail.Dashboard.Services
 @inject NavigationManager NavigationManager
 @page "/routes/form/{RouteId?}" 
+@inject RouteService RouteService
 
 <div>
     <header class="mb-8">
@@ -8,31 +10,37 @@
         <p class="text-gray-500 mt-1">@Description</p>
     </header>
 
-    <div class="bg-white p-6 md:p-10 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200">
-        <EditForm Model="@CurrentRoute" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+    @if (Route == null)
+    {
+        <div class="p-8 text-center text-gray-400">Loading...</div>
+    }
+    else
+    {
+        <div class="bg-white p-6 md:p-10 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200">
+        <EditForm Model="Route" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
-            
+
             <!-- Route Name -->
             <div class="mb-8">
                 <label for="routeName" class="block text-sm font-medium text-gray-700 mb-2">Route Name</label>
-                <InputText id="routeName" @bind-Value="CurrentRoute.Name" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" />
-                <ValidationMessage For="@(() => CurrentRoute.Name)" />
+                <InputText id="routeName" @bind-Value="Route.Name" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" />
+                <ValidationMessage For="@(() => Route.Name)" />
                 <p class="mt-1 text-xs text-gray-500">A descriptive name for this route.</p>
             </div>
 
             <!-- Cluster ID -->
             <div class="mb-8">
                 <label for="clusterId" class="block text-sm font-medium text-gray-700 mb-2">Cluster ID (Optional)</label>
-                <InputText id="clusterId" @bind-Value="CurrentRoute.ClusterId" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" />
+                <InputText id="clusterId" @bind-Value="Route.ClusterId" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" />
                 <p class="mt-1 text-xs text-gray-500">The ID of the cluster this route belongs to.</p>
             </div>
 
             <!-- Route Path -->
             <div class="mb-8">
                 <label for="routePath" class="block text-sm font-medium text-gray-700 mb-2">Route Path</label>
-                <InputText id="routePath" @bind-Value="CurrentRoute.Match.Path" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" />
-                <ValidationMessage For="@(() => CurrentRoute.Match.Path)" />
+                <InputText id="routePath" @bind-Value="Route.Match.Path" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" />
+                <ValidationMessage For="@(() => Route.Match.Path)" />
                 <p class="mt-1 text-xs text-gray-500">The public path for this route (e.g., /users). Corresponds to Match.Path.</p>
             </div>
 
@@ -43,7 +51,7 @@
                     @foreach (var method in AllHttpMethods)
                     {
                         <div class="flex items-center">
-                            <input type="checkbox" id="method_@method" value="@method" checked="@CurrentRoute.Match.Methods?.Contains(method)" @onchange="args => ToggleMethod(method, (bool)args.Value!)" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500" />
+                            <input type="checkbox" id="method_@method" value="@method" checked="@Route.Match.Methods?.Contains(method)" @onchange="args => ToggleMethod(method, (bool)args.Value!)" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500" />
                             <label for="method_@method" class="ml-2 block text-sm text-gray-900">@method</label>
                         </div>
                     }
@@ -54,14 +62,14 @@
             <!-- Hosts -->
             <div class="mb-8">
                 <label for="hosts" class="block text-sm font-medium text-gray-700 mb-2">Hosts</label>
-                <InputTextArea id="hosts" @bind-Value="HostsString" rows="2" class="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" placeholder="example.com, *.example.org" />
+                <InputTextArea id="hosts" @bind-Value="HostValues" rows="2" class="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" placeholder="example.com, *.example.org" />
                 <p class="mt-2 text-xs text-gray-500">Comma-separated list of hostnames to match (e.g., example.com, *.example.com). Corresponds to Match.Hosts.</p>
             </div>
-            
+
             <!-- Headers Matching Rules -->
             <div class="mb-8">
                 <h4 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Header Matching Rules</h4>
-                @foreach (var headerRule in CurrentRoute.Match.Headers ?? [])
+                @foreach (var headerRule in Route.Match?.Headers ?? [])
                 {
                     var localHeaderRule = headerRule; // Avoid closure issues in loop
                     <div class="space-y-6 p-6 border border-gray-200 rounded-lg bg-gray-50/50 mb-4">
@@ -70,7 +78,7 @@
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Header Name</label>
                                 <InputText @bind-Value="localHeaderRule.Name" placeholder="X-Custom-Header" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" />
                             </div>
-                      
+
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Match Mode</label>
                                 <InputSelect @bind-Value="localHeaderRule.Mode" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
@@ -99,7 +107,7 @@
             <!-- Query Parameters Matching Rules -->
             <div class="mb-8">
                 <h4 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Query Parameter Matching Rules</h4>
-                 @foreach (var queryRule in CurrentRoute.Match.QueryParameters ?? [])
+                 @foreach (var queryRule in Route.Match?.QueryParameters ?? [])
                 {
                     var localQueryRule = queryRule; // Avoid closure issues in loop
                     <div class="space-y-6 p-6 border border-gray-200 rounded-lg bg-gray-50/50 mb-4">
@@ -108,7 +116,7 @@
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Parameter Name</label>
                                 <InputText @bind-Value="localQueryRule.Name" placeholder="param_name" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm" />
                             </div>
-                          
+
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Match Mode</label>
                                 <InputSelect @bind-Value="localQueryRule.Mode" class="block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
@@ -145,120 +153,81 @@
             </div>
         </EditForm>
     </div>
-</div>
+
+    }
+ </div>
 
 
 
 @code {
     [Parameter] public string? RouteId { get; set; }
-
-    private RouteResult CurrentRoute { get; set; } = new RouteResult();
+    RouteRequest? Route;
     private string Title = "Create";
     private string Description = "Add a new route to the gateway.";
 
-// Helper for Hosts list binding
-    private string HostsString
+    private string HostValues
     {
-        get => string.Join(", ", CurrentRoute.Match?.Hosts ?? []);
-        set => CurrentRoute.Match.Hosts = value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        get => string.Join(", ", Route.Match?.Hosts ?? []);
+        set => Route.Match.Hosts = value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
     }
-    
 
-    private List<string> AllHttpMethods = new List<string> { "GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS" };
+    private List<string> AllHttpMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"];
 
     protected override async Task OnParametersSetAsync()
     {
         if (!string.IsNullOrEmpty(RouteId))
         {
-            Title = "Edit";
-            Description = "Modify the details of the route.";
-// Simulate fetching existing route data
-// In a real app, you would fetch this from a service:
-// CurrentRoute = await RouteService.GetRouteByIdAsync(RouteId);
-// For now, let's create a sample one if an ID is present
-            if (Guid.TryParse(RouteId, out Guid id)) // Assuming RouteId is a Guid for this example
+            var result = await RouteService.GetAsync(RouteId, CancellationToken.None);
+            Route = new RouteRequest
             {
-                CurrentRoute = GetSampleRouteById(id.ToString()) ?? new RouteResult { Name = "New Route from Edit" }; // Fallback if not found
-            }
-            else
-            {
-// Handle cases where RouteId is not a valid Guid or for non-Guid IDs if applicable
-                Console.WriteLine($"Invalid RouteId format: {RouteId}");
-                CurrentRoute = new RouteResult { Name = "New Route due to invalid ID" };
-            }
+                Name = result.Name,
+                ClusterId = result.ClusterId,
+                Match = result.Match != null
+                    ? new RouteMatch
+                    {
+                        Path = result.Match.Path,
+                        Methods = result.Match.Methods != null ? [..result.Match.Methods] : [],
+                        Hosts = result.Match.Hosts != null ? [..result.Match.Hosts] : [],
+                        Headers = result.Match.Headers != null
+                            ? result.Match.Headers.Select(h => new RouteHeader
+                            {
+                                Name = h.Name,
+                                Mode = h.Mode,
+                                Values = h.Values != null ? [..h.Values] : [],
+                                IsCaseSensitive = h.IsCaseSensitive
+                            }).ToList()
+                            : [],
+                        QueryParameters = result.Match.QueryParameters != null
+                            ? result.Match.QueryParameters.Select(q => new RouteQueryParameter
+                            {
+                                Name = q.Name,
+                                Mode = q.Mode,
+                                Values = q.Values != null ? [..q.Values] : [],
+                                IsCaseSensitive = q.IsCaseSensitive
+                            }).ToList()
+                            : []
+                    }
+                    : new RouteMatch()
+            };
         }
         else
         {
-            Title = "Create";
-            Description = "Add a new route to the gateway.";
-            CurrentRoute = new RouteResult(); // Initialize for a new route
-        }
-
-// Ensure Match object is initialized
-        if (CurrentRoute.Match == null)
-        {
-            CurrentRoute.Match = new RouteMatch();
+            Route = new RouteRequest();
         }
     }
 
-// Placeholder for fetching a route. Replace with actual data access.
-    private RouteResult? GetSampleRouteById(string id)
+    private async Task HandleValidSubmit()
     {
-// This is where you would typically call a service to get data.
-// For now, returning a predefined sample or null.
-        
-            return new RouteResult
-            {
-                Name = "Sample Editing Route",
-                ClusterId = "test cluster",
-                Match = new RouteMatch
-                {
-                    Path = "/sample/edit/path",
-                    Methods = new List<string> { "GET", "POST" },
-                    Hosts = new List<string> { "edit.example.com" },
-                    Headers = new List<RouteHeader>
-                    {
-                        new RouteHeader { Name = "X-Edit-Header", Values = new List<string> { "EditValue" }, Mode = HeaderMatchMode.Exists, IsCaseSensitive = true }
-                    },
-                    QueryParameters = new List<RouteQueryParameter>
-                    {
-                        new RouteQueryParameter { Name = "edit_param", Values = new List<string> { "edit_val" }, Mode = QueryParameterMatchMode.Exact, IsCaseSensitive = false }
-                    }
-                }
-            };
-        
-    }
-
-
-    private void HandleValidSubmit()
-    {
-// Process the CurrentRoute.Match.Hosts from HostsString before saving
-// This is already handled by the HostsString setter.
-
-// Process comma-separated strings for Header.Values and QueryParameter.Values
-// This is now handled by the extension methods GetValuesString/SetValuesString used with @bind-Value="localRule.ValuesString"
-
-        Console.WriteLine($"Form Submitted: Valid. Route Name: {CurrentRoute.Name}");
-// In a real app, save CurrentRoute to your data store
-// e.g., await RouteService.SaveRouteAsync(CurrentRoute);
-
-// For demonstration, just log the data
-        Console.WriteLine($"Route Name: {CurrentRoute.Name}");
-        Console.WriteLine($"Cluster ID: {CurrentRoute.ClusterId}");
-        Console.WriteLine($"Path: {CurrentRoute.Match.Path}");
-        Console.WriteLine($"Methods: {string.Join(", ", CurrentRoute.Match.Methods)}");
-        Console.WriteLine($"Hosts: {string.Join(", ", CurrentRoute.Match.Hosts)}");
-        foreach (var header in CurrentRoute.Match.Headers)
+        if (string.IsNullOrEmpty(RouteId))
         {
-            Console.WriteLine($"Header: {header.Name}, Values: {string.Join(", ", header.Values)}, Mode: {header.Mode}, CaseSensitive: {header.IsCaseSensitive}");
+            await RouteService.CreateAsync(Route!, CancellationToken.None);
+        }
+        else
+        {
+            await RouteService.UpdateAsync(RouteId, Route!, CancellationToken.None);
         }
 
-        foreach (var queryParam in CurrentRoute.Match.QueryParameters)
-        {
-            Console.WriteLine($"Query Param: {queryParam.Name}, Values: {string.Join(", ", queryParam.Values)}, Mode: {queryParam.Mode}, CaseSensitive: {queryParam.IsCaseSensitive}");
-        }
-
-        NavigationManager.NavigateTo("/"); // Navigate to the routes list page
+        NavigationManager.NavigateTo("/routes");
     }
 
     private void HandleInvalidSubmit()
@@ -268,37 +237,25 @@
 
     private void ToggleMethod(string method, bool isChecked)
     {
-        if (isChecked)
-        {
-            if (!CurrentRoute.Match.Methods.Contains(method))
-            {
-                CurrentRoute.Match.Methods.Add(method);
-            }
-        }
-        else
-        {
-            CurrentRoute.Match.Methods.Remove(method);
-        }
+
     }
 
     private void AddHeaderRule()
     {
-        CurrentRoute.Match.Headers.Add(new RouteHeader());
     }
 
     private void RemoveHeaderRule(RouteHeader headerRule)
     {
-        CurrentRoute.Match.Headers.Remove(headerRule);
     }
 
     private void AddQueryParameterRule()
     {
-        CurrentRoute.Match.QueryParameters.Add(new RouteQueryParameter());
+
     }
 
     private void RemoveQueryParameterRule(RouteQueryParameter queryParameterRule)
     {
-        CurrentRoute.Match.QueryParameters.Remove(queryParameterRule);
+
     }
 
     private void Cancel()
@@ -306,3 +263,5 @@
         NavigationManager.NavigateTo("/routes");
     }
 }
+
+

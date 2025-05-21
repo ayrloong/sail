@@ -1,16 +1,12 @@
 @implements Microsoft.FluentUI.AspNetCore.Components.IDialogContentComponent
 @using Microsoft.FluentUI.AspNetCore.Components
 
-@* This component will be shown by IDialogService.
-   It contains a FluentDialog, and its inner parts are styled with Tailwind CSS.
-*@
-
-    <FluentDialogHeader>
+    <FluentDialogHeader ShowDismiss="false">
         <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-white rounded-t-lg">
             <h3 class="text-xl font-semibold text-gray-900">
                 @Title
             </h3>
-            <button @onclick="() => CloseDialogAndDismissAsync()" type="button"
+            <button @onclick="CancelAsync" type="button"
                     class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
                     aria-label="Close dialog">
                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -23,99 +19,40 @@
 
     <FluentDialogBody>
         <div class="p-5 space-y-4 bg-white">
-            @if (Content != null)
-            {
-                @Content
-            }
-            else if (!string.IsNullOrEmpty(Message))
-            {
+           
                 <p class="text-base leading-relaxed text-gray-700 whitespace-pre-line">
                     @Message
                 </p>
-            }
-
-            <!-- Card showing FluentDialog instance properties -->
-            <div class="bg-gray-50 shadow-sm rounded-lg p-3 border border-gray-200 mt-4">
-                <p class="text-xs text-gray-500 mb-1">Inner <code class="text-xs">&lt;FluentDialog&gt;</code> component settings:</p>
-                <p class="text-sm text-gray-800">
-                    Modal: <span class="font-medium">@(Dialog?.Modal.ToString() ?? "N/A")</span>,
-                    TrapFocus: <span class="font-medium">@(Dialog?.TrapFocus.ToString() ?? "N/A")</span>
-                </p>
-            </div>
         </div>
     </FluentDialogBody>
 
     <FluentDialogFooter>
         <div class="flex items-center justify-end p-4 space-x-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-            <button @onclick="HandleCancelAsync" type="button"
+            <button @onclick="@CancelAsync" type="button"
                     class="text-gray-700 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg border border-gray-300 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
-                @CancelText
+                Cancel
             </button>
-            <button @onclick="HandleConfirmAsync" type="button"
+            <button @onclick="ConfirmAsync" type="button"
                     class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                @ConfirmText
+                Confirm
             </button>
         </div>
     </FluentDialogFooter>
 
 
 @code {
-    // This @ref is for the <FluentDialog> component instance within this .razor file
-    private FluentDialog Dialog { get; set; }
-
-    // This CascadingParameter is the IDialogReference provided by the IDialogService
-    // It's essential for this component to close itself when shown by the service.
-    [CascadingParameter] public IDialogReference DialogContext { get; set; } = default!;
-
-    [Parameter] public string Title { get; set; } = "确认"; // Default is "确认"
+    [CascadingParameter] private FluentDialog Dialog { get; set; } = default!;
+ 
+    [Parameter] public string? Title { get; set; }
     [Parameter] public string? Message { get; set; }
-    [Parameter] public RenderFragment? Content { get; set; }
-    [Parameter] public string ConfirmText { get; set; } = "确定"; // Default is "确定"
-    [Parameter] public string CancelText { get; set; } = "取消"; // Default is "取消"
-
-    /// <summary>
-    /// Closes the dialog via DialogContext (from IDialogService) and passes a result.
-    /// </summary>
-    private async Task CloseDialogAsync(object? result)
+    
+    private async Task ConfirmAsync()
     {
-        if (DialogContext != null)
-        {
-            await DialogContext.CloseAsync();
-        }
-        else
-        {
-            // Fallback if not used with IDialogService (e.g. direct embedding, though less common for dialogs)
-            // This might try to close the inner FluentDialog, but it won't notify the IDialogService.
-            // For IDialogService, DialogContext.CloseAsync() is the correct way.
-            if (Dialog != null)
-            {
-                await Dialog.CancelAsync(); // Or HideAsync(), depending on desired behavior
-            }
-        }
+        await Dialog.CloseAsync();
     }
 
-    /// <summary>
-    /// Handles the action of the dismiss button ('x' in the header).
-    /// </summary>
-    private async Task CloseDialogAndDismissAsync()
+    private async Task CancelAsync()
     {
-        // Typically, dismissing is like cancelling.
-        await CloseDialogAsync(null); // Or pass a specific "dismissed" result if needed
-    }
-
-    /// <summary>
-    /// Handles the confirm action.
-    /// </summary>
-    private async Task HandleConfirmAsync()
-    {
-        await CloseDialogAsync(true); // Return true for confirmation
-    }
-
-    /// <summary>
-    /// Handles the cancel action.
-    /// </summary>
-    private async Task HandleCancelAsync()
-    {
-        await CloseDialogAsync(false); // Return false for cancellation
+        await Dialog.CancelAsync();
     }
 }
