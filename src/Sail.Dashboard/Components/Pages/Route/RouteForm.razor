@@ -212,12 +212,22 @@
         }
         else
         {
-            Route = new RouteRequest();
+            Route = new RouteRequest
+            {
+                Match = new RouteMatch
+                {
+                    Headers = [],
+                    QueryParameters = [],
+                    Methods = [],
+                    Hosts = []
+                }
+            };
         }
     }
 
     private async Task HandleValidSubmit()
     {
+
         if (string.IsNullOrEmpty(RouteId))
         {
             await RouteService.CreateAsync(Route!, CancellationToken.None);
@@ -235,27 +245,37 @@
         Console.WriteLine("Form Submitted: Invalid");
     }
 
-    private void ToggleMethod(string method, bool isChecked)
+    private void ToggleMethod(string method, bool @checked)
     {
-
+        if (@checked)
+        {
+            if (!Route.Match.Methods.Contains(method))
+                Route.Match.Methods.Add(method);
+        }
+        else
+        {
+            Route.Match.Methods.Remove(method);
+        }
     }
 
     private void AddHeaderRule()
     {
+        Route.Match.Headers.Add(new RouteHeader());
     }
 
     private void RemoveHeaderRule(RouteHeader headerRule)
     {
+        Route.Match.Headers.Remove(headerRule);
     }
 
     private void AddQueryParameterRule()
     {
-
+        Route.Match.QueryParameters.Add(new RouteQueryParameter());
     }
 
     private void RemoveQueryParameterRule(RouteQueryParameter queryParameterRule)
     {
-
+        Route.Match.QueryParameters.Remove(queryParameterRule);
     }
 
     private void Cancel()
@@ -263,5 +283,8 @@
         NavigationManager.NavigateTo("/routes");
     }
 }
+
+
+
 
 
