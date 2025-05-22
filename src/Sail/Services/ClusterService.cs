@@ -8,7 +8,16 @@ namespace Sail.Services;
 
 public class ClusterService(SailContext context)
 {
-    public async Task<IEnumerable<ClusterResponse>> GetAsync(string keywords,
+    
+    public async Task<ClusterResponse> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Cluster>.Filter.Where(x => x.Id == id);
+        var routes = await context.Clusters.FindAsync(filter, cancellationToken: cancellationToken);
+        var result = await routes.SingleOrDefaultAsync(cancellationToken: cancellationToken);
+        return MapToCluster(result);
+    }
+    
+    public async Task<IEnumerable<ClusterResponse>> ListAsync(string keywords,
         CancellationToken cancellationToken = default)
     {
         var filter = Builders<Cluster>.Filter.Empty;

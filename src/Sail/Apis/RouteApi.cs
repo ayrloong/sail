@@ -11,26 +11,26 @@ public static class RouteApi
     {
         var api = app.MapGroup("api/routes").HasApiVersion(1.0);
 
-        api.MapGet("/", GetItems);
-        api.MapGet("/{id:guid}", Find);
+        api.MapGet("/", List);
+        api.MapGet("/{id:guid}", Get);
         api.MapPost("/", Create);
         api.MapPut("/{id:guid}", Update);
         api.MapDelete("/{id:guid}", Delete);
         return api;
     }
 
-    private static async Task<Results<Ok<RouteResponse>, NotFound>> Find(RouteService service,
+    private static async Task<Results<Ok<RouteResponse>, NotFound>> Get(RouteService service,
         Guid id,
         CancellationToken cancellationToken)
     {
-        var items = await service.FindAsync(id, cancellationToken);
+        var items = await service.GetAsync(id, cancellationToken);
         return TypedResults.Ok(items);
     }
-    private static async Task<Results<Ok<IEnumerable<RouteResponse>>, NotFound>> GetItems(RouteService service,
+    private static async Task<Results<Ok<IEnumerable<RouteResponse>>, NotFound>> List(RouteService service,
         string? keywords,
         CancellationToken cancellationToken)
     {
-        var items = await service.GetAsync(keywords, cancellationToken);
+        var items = await service.ListAsync(keywords, cancellationToken);
         return TypedResults.Ok(items);
     }
 

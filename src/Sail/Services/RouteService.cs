@@ -10,7 +10,7 @@ namespace Sail.Services;
 public class RouteService(SailContext context)
 {
     
-    public async Task<RouteResponse> FindAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<RouteResponse> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var filter = Builders<Route>.Filter.Where(x => x.Id == id);
         var routes = await context.Routes.FindAsync(filter, cancellationToken: cancellationToken);
@@ -19,7 +19,7 @@ public class RouteService(SailContext context)
     }
 
     
-    public async Task<IEnumerable<RouteResponse>> GetAsync(string? keywords,
+    public async Task<IEnumerable<RouteResponse>> ListAsync(string? keywords,
         CancellationToken cancellationToken = default)
     {
         var filter = Builders<Route>.Filter.Empty;

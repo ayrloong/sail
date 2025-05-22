@@ -2,7 +2,7 @@ namespace Sail.Dashboard.Models.Clusters;
 
 public class SessionAffinity
 {
-    public bool? Enabled { get; set; }
+    public bool Enabled { get; set; }
     public string? Policy { get; set; }
     public string? FailurePolicy { get; set; }
     public string? AffinityKeyName { get; set; }
