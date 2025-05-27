@@ -21,7 +21,7 @@ public class ClusterService(DashboardClient client)
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task UpdateAsync(Guid id, ClusterRequest request, CancellationToken cancellationToken)
+    public async Task UpdateAsync(string id, ClusterRequest request, CancellationToken cancellationToken)
     {
         var response =
             await client.HttpClient.PutAsJsonAsync($"/api/clusters/{id}", request,

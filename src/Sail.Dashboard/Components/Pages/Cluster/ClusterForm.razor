@@ -313,6 +313,16 @@
 
     private async Task HandleValidSubmit()
     { 
+        if (string.IsNullOrEmpty(ClusterId))
+        {
+            await ClusterService.CreateAsync(ClusterRequest!, CancellationToken.None);
+        }
+        else
+        {
+            await ClusterService.UpdateAsync(ClusterId, ClusterRequest!, CancellationToken.None);
+        }
+
+        NavigationManager.NavigateTo("/clusters");
     }
 
     private void HandleInvalidSubmit()

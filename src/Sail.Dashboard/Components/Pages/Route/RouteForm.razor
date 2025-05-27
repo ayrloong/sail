@@ -227,7 +227,6 @@
 
     private async Task HandleValidSubmit()
     {
-
         if (string.IsNullOrEmpty(RouteId))
         {
             await RouteService.CreateAsync(Route!, CancellationToken.None);
