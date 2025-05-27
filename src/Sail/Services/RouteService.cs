@@ -2,49 +2,35 @@ using ErrorOr;
 using MongoDB.Driver;
 using Sail.Core.Entities;
 using Sail.Storage.MongoDB;
-using Sail.Models.Route;
+using Sail.Models.Routes;
 using Route = Sail.Core.Entities.Route;
 
 namespace Sail.Services;
 
-public class RouteService(SailContext context) : IRouteService
+public class RouteService(SailContext context)
 {
-    public async Task<IEnumerable<RouteVm>> GetAsync(CancellationToken cancellationToken = default)
+    
+    public async Task<RouteResponse> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Route>.Filter.Where(x => x.Id == id);
+        var routes = await context.Routes.FindAsync(filter, cancellationToken: cancellationToken);
+        var result = await routes.SingleOrDefaultAsync(cancellationToken: cancellationToken);
+        return MapToRoute(result);
+    }
+
+    
+    public async Task<IEnumerable<RouteResponse>> ListAsync(string? keywords,
+        CancellationToken cancellationToken = default)
     {
         var filter = Builders<Route>.Filter.Empty;
         var routes = await context.Routes.FindAsync(filter, cancellationToken: cancellationToken);
         var items = await routes.ToListAsync(cancellationToken: cancellationToken);
-        return items.Select(MapToRouteVm);
+        return items.Select(MapToRoute);
     }
 
-    public async Task<ErrorOr<Created>> CreateAsync(RouteRequest request,CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<Created>> CreateAsync(RouteRequest request, CancellationToken cancellationToken = default)
     {
-        var route = new Route
-        {
-            Name = request.Name,
-            ClusterId = request.ClusterId,
-            Match = new RouteMatch
-            {
-                Path = request.Match.Path,
-                Hosts = request.Match.Hosts ?? [],
-                Methods = request.Match.Methods ?? [],
-                QueryParameters = request.Match.ParameterRequests?.Select(x => new RouteQueryParameter
-                {
-                    Name = x.Name,
-                    Values = x.Values,
-                    Mode = x.Mode,
-                    IsCaseSensitive = x.IsCaseSensitive
-                }).ToList() ?? [],
-                Headers = request.Match.RouteHeaders?.Select(x => new RouteHeader
-                {
-                    Name = x.Name,
-                    Values = x.Values,
-                    Mode = x.Mode,
-                    IsCaseSensitive = x.IsCaseSensitive
-                }).ToList() ?? []
-            }
-        };
-        
+        var route = CreateRouteFromRequest(request);
         await context.Routes.InsertOneAsync(route, cancellationToken: cancellationToken);
         return Result.Created;
     }
@@ -53,10 +39,18 @@ public class RouteService(SailContext context) : IRouteService
         CancellationToken cancellationToken = default)
     {
         var filter = Builders<Route>.Filter.And(Builders<Route>.Filter.Where(x => x.Id == id));
-        
+
         var update = Builders<Route>.Update
-            .Set(x => x.Name,request.Name)
+            .Set(x => x.Name, request.Name)
             .Set(x => x.ClusterId, request.ClusterId)
+            .Set(x => x.Match, CreateRouteMatchFromRequest(request.Match))
+            .Set(x => x.AuthorizationPolicy, request.AuthorizationPolicy)
+            .Set(x => x.RateLimiterPolicy, request.RateLimiterPolicy)
+            .Set(x => x.CorsPolicy, request.CorsPolicy)
+            .Set(x => x.TimeoutPolicy, request.TimeoutPolicy)
+            .Set(x => x.Timeout, request.Timeout)
+            .Set(x => x.MaxRequestBodySize, request.MaxRequestBodySize)
+            .Set(x=>x.Transforms,request.Transforms)
             .Set(x => x.UpdatedAt, DateTimeOffset.UtcNow);
 
         await context.Routes.FindOneAndUpdateAsync(filter, update, cancellationToken: cancellationToken);
@@ -70,31 +64,84 @@ public class RouteService(SailContext context) : IRouteService
         return Result.Deleted;
     }
 
-    private RouteVm MapToRouteVm(Route route)
+    private Route CreateRouteFromRequest(RouteRequest request)
     {
-        return new RouteVm
+        var route = new Route
+        {
+            Name = request.Name,
+            ClusterId = request.ClusterId,
+            Match = CreateRouteMatchFromRequest(request.Match),
+            Order = request.Order,
+            AuthorizationPolicy = request.AuthorizationPolicy,
+            RateLimiterPolicy = request.RateLimiterPolicy,
+            CorsPolicy = request.CorsPolicy,
+            TimeoutPolicy = request.TimeoutPolicy,
+            Timeout = request.Timeout,
+            MaxRequestBodySize = request.MaxRequestBodySize,
+            Transforms = request.Transforms
+        };
+        return route;
+    }
+
+    private RouteMatch CreateRouteMatchFromRequest(RouteMatchRequest match)
+    {
+        return new RouteMatch
+        {
+            Path = match.Path,
+            Hosts = match.Hosts ?? [],
+            Methods = match.Methods ?? [],
+            QueryParameters = match.QueryParameters?.Select(CreateQueryParameterFromRequest).ToList() ?? [],
+            Headers = match.Headers?.Select(CreateRouteHeaderFromRequest).ToList() ?? []
+        };
+    }
+
+    private RouteQueryParameter CreateQueryParameterFromRequest(QueryParameterRequest queryParameter)
+    {
+        return new RouteQueryParameter
+        {
+            Name = queryParameter.Name,
+            Values = queryParameter.Values,
+            Mode = queryParameter.Mode,
+            IsCaseSensitive = queryParameter.IsCaseSensitive
+        };
+    }
+
+    private RouteHeader CreateRouteHeaderFromRequest(RouteHeaderRequest header)
+    {
+        return new RouteHeader
+        {
+            Name = header.Name,
+            Values = header.Values,
+            Mode = header.Mode,
+            IsCaseSensitive = header.IsCaseSensitive
+        };
+    }
+
+    private RouteResponse MapToRoute(Route route)
+    {
+        return new RouteResponse
         {
             Id = route.Id,
             ClusterId = route.ClusterId,
             Name = route.Name,
-            Match = new RouteMatchVm
+            Match = new RouteMatchResponse
             {
                 Path = route.Match.Path,
                 Hosts = route.Match.Hosts,
                 Methods = route.Match.Methods,
-                Headers = route.Match.Headers.Select(h => new RouteHeaderVm
+                Headers = route.Match.Headers.Select(h => new RouteHeaderResponse
                 {
                     Name = h.Name,
                     Mode = h.Mode,
-                    Values = h.Values,
+                    Values = h.Values ?? [],
                     IsCaseSensitive = h.IsCaseSensitive
 
                 }),
-                QueryParameters = route.Match.QueryParameters.Select(q => new RouteQueryParameterVm
-                {  
+                QueryParameters = route.Match.QueryParameters.Select(q => new RouteQueryParameterResponse
+                {
                     Name = q.Name,
                     Mode = q.Mode,
-                    Values = q.Values,
+                    Values = q.Values ?? [],
                     IsCaseSensitive = q.IsCaseSensitive
                 })
             },
@@ -105,6 +152,7 @@ public class RouteService(SailContext context) : IRouteService
             TimeoutPolicy = route.TimeoutPolicy,
             Timeout = route.Timeout,
             MaxRequestBodySize = route.MaxRequestBodySize,
+            Transforms = route.Transforms,
             CreatedAt = route.CreatedAt,
             UpdatedAt = route.UpdatedAt
         };

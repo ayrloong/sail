@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Sail.Extensions;
+using Sail.Models.Certificates;
 using Sail.Services;
 
 namespace Sail.Apis;
@@ -22,7 +23,7 @@ public static class CertificateApi
         return api;
     }
 
-    private static async Task<Results<Ok<IEnumerable<SNIVm>>, NotFound>> GetSNIs(ICertificateService service,
+    private static async Task<Results<Ok<IEnumerable<SNIResponse>>, NotFound>> GetSNIs(CertificateService service,
         Guid certificateId,
         CancellationToken cancellationToken)
     {
@@ -30,7 +31,7 @@ public static class CertificateApi
         return TypedResults.Ok(items);
     }
 
-    private static async Task<Results<Created, ProblemHttpResult>> CreateSNI(ICertificateService service,
+    private static async Task<Results<Created, ProblemHttpResult>> CreateSNI(CertificateService service,
         Guid certificateId, SNIRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateSNIAsync(certificateId, request, cancellationToken);
@@ -41,7 +42,7 @@ public static class CertificateApi
         );
     }
 
-    private static async Task<Results<Ok, ProblemHttpResult>> UpdateSNI(ICertificateService service, Guid certificateId,
+    private static async Task<Results<Ok, ProblemHttpResult>> UpdateSNI(CertificateService service, Guid certificateId,
         Guid id, SNIRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateSNIAsync(certificateId, id, request, cancellationToken);
@@ -52,7 +53,7 @@ public static class CertificateApi
         );
     }
 
-    private static async Task<Results<Ok, ProblemHttpResult>> DeleteSNI(ICertificateService service, Guid certificateId,
+    private static async Task<Results<Ok, ProblemHttpResult>> DeleteSNI(CertificateService service, Guid certificateId,
         Guid id, CancellationToken cancellationToken)
     {
         var result = await service.DeleteSNIAsync(certificateId, id, cancellationToken);
@@ -63,14 +64,15 @@ public static class CertificateApi
         );
     }
 
-    private static async Task<Results<Ok<IEnumerable<CertificateVm>>, NotFound>> GetItems(ICertificateService service,
+    private static async Task<Results<Ok<IEnumerable<CertificateResponse>>, NotFound>> GetItems(
+        CertificateService service,
         CancellationToken cancellationToken)
     {
         var items = await service.GetAsync(cancellationToken);
         return TypedResults.Ok(items);
     }
 
-    private static async Task<Results<Created, ProblemHttpResult>> Create(ICertificateService service,
+    private static async Task<Results<Created, ProblemHttpResult>> Create(CertificateService service,
         CertificateRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateAsync(request, cancellationToken);
@@ -81,28 +83,25 @@ public static class CertificateApi
         );
     }
 
-    private static async Task<Results<Ok, ProblemHttpResult>> Update(ICertificateService service, Guid id,
+    private static async Task<Results<Ok, ProblemHttpResult>> Update(CertificateService service, Guid id,
         CertificateRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateAsync(id, request, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            updated => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }
 
-    private static async Task<Results<Ok, ProblemHttpResult>> Delete(ICertificateService service, Guid id,
+    private static async Task<Results<Ok, ProblemHttpResult>> Delete(CertificateService service, Guid id,
         CancellationToken cancellationToken)
     {
         var result = await service.DeleteAsync(id, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            deleted => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }
 }
-
-public record CertificateRequest(string Cert,string Key);
-public record SNIRequest(string HostName, string Name);

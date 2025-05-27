@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Sail.Extensions;
+using Sail.Models.Clusters;
 using Sail.Services;
 
 namespace Sail.Apis;
@@ -10,21 +11,30 @@ public static class ClusterApi
     {
         var api = app.MapGroup("api/clusters").HasApiVersion(1.0);
 
-        api.MapGet("/", GetItems);
+        api.MapGet("/", List);
+        api.MapGet("/{id:guid}", Get);
         api.MapPost("/", Create);
-        api.MapPatch("/{id:guid}", Update);
+        api.MapPut("/{id:guid}", Update);
         api.MapDelete("/{id:guid}", Delete);
         return api;
     }
 
-    private static async Task<Results<Ok<IEnumerable<ClusterVm>>, NotFound>> GetItems(IClusterService service,
+    private static async Task<Results<Ok<ClusterResponse>, NotFound>> Get(ClusterService service,
+        Guid id,
         CancellationToken cancellationToken)
     {
-        var items = await service.GetAsync(cancellationToken);
+        var items = await service.GetAsync(id, cancellationToken);
+        return TypedResults.Ok(items);
+    }
+    private static async Task<Results<Ok<IEnumerable<ClusterResponse>>, NotFound>> List(ClusterService service,
+        string? keywords,
+        CancellationToken cancellationToken)
+    {
+        var items = await service.ListAsync(keywords, cancellationToken);
         return TypedResults.Ok(items);
     }
 
-    private static async Task<Results<Created, ProblemHttpResult>> Create(IClusterService service,
+    private static async Task<Results<Created, ProblemHttpResult>> Create(ClusterService service,
         ClusterRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateAsync(request, cancellationToken);
@@ -35,34 +45,25 @@ public static class ClusterApi
         );
     }
 
-    private static async Task<Results<Ok, ProblemHttpResult>> Update(IClusterService service, Guid id,
+    private static async Task<Results<Ok, ProblemHttpResult>> Update(ClusterService service, Guid id,
         ClusterRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateAsync(id, request, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            updated => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }
 
-    private static async Task<Results<Ok, ProblemHttpResult>> Delete(IClusterService service, Guid id,
+    private static async Task<Results<Ok, ProblemHttpResult>> Delete(ClusterService service, Guid id,
         CancellationToken cancellationToken)
     {
         var result = await service.DeleteAsync(id, cancellationToken);
 
         return result.Match<Results<Ok, ProblemHttpResult>>(
-            created => TypedResults.Ok(),
+            deleted => TypedResults.Ok(),
             errors => errors.HandleErrors()
         );
     }
 }
-
-public record ClusterRequest(
-    string Name,
-    string ServiceName,
-    string ServiceDiscoveryType,
-    string LoadBalancingPolicy,
-    List<DestinationRequest> Destinations);
-
-public record DestinationRequest(string Host,string Address,string Health);

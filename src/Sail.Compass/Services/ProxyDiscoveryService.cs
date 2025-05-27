@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sail.Api.V1;
@@ -24,14 +23,13 @@ public class ProxyDiscoveryService : BackgroundHostedService
         IHostApplicationLifetime hostApplicationLifetime,
         IResourceInformer<Route> routeInformer,
         IResourceInformer<Cluster> clusterInformer,
-        IResourceInformer<Certificate> certificateInformer,
         ILogger<ProxyDiscoveryService> logger) : base(hostApplicationLifetime, logger)
     {
         var registrations = new List<IResourceInformerRegistration>
         {
             routeInformer.Register(Notification),
             clusterInformer.Register(Notification),
-            certificateInformer.Register(Notification)
+       
         };
 
         _cache = cache;
@@ -41,9 +39,8 @@ public class ProxyDiscoveryService : BackgroundHostedService
 
         routeInformer.StartWatching();
         clusterInformer.StartWatching();
-        certificateInformer.StartWatching();
         _queue = new ProcessingRateLimitedQueue<QueueItem>(perSecond: 0.5, burst: 1);
-        _changeQueueItem = new QueueItem("");
+        _changeQueueItem = new QueueItem("Proxy discovery reconciler");
     }
 
     public override async Task RunAsync(CancellationToken cancellationToken)
@@ -66,7 +63,7 @@ public class ProxyDiscoveryService : BackgroundHostedService
 
             try
             {
-                await _reconciler.ProcessAsync(cancellationToken).ConfigureAwait(false);
+                await _reconciler.ProcessProxyAsync(cancellationToken).ConfigureAwait(false);
             }
             catch
             {
@@ -91,13 +88,6 @@ public class ProxyDiscoveryService : BackgroundHostedService
         _cache.UpdateCluster(resource);
         NotificationChanged();
     }
-
-    private void Notification(ResourceEvent<Certificate> resource)
-    {
-        _cache.UpdateCertificate(resource);
-        NotificationChanged();
-    }
-
     private void NotificationChanged()
     {
         if (!_registrationsReady)

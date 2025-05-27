@@ -1,20 +1,19 @@
 using ErrorOr;
-using Sail.Apis;
 using Sail.Core.Entities;
 using Sail.Storage.MongoDB;
 using MongoDB.Driver;
+using Sail.Models.Certificates;
 
 namespace Sail.Services;
 
-public class CertificateService(SailContext context) : ICertificateService
+public class CertificateService(SailContext context)
 {
-    public async Task<IEnumerable<CertificateVm>> GetAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CertificateResponse>> GetAsync(CancellationToken cancellationToken = default)
     {
-
         var filter = Builders<Certificate>.Filter.Empty;
         var certificates = await context.Certificates.FindAsync(filter, cancellationToken: cancellationToken);
         var items = await certificates.ToListAsync(cancellationToken: cancellationToken);
-        return items.Select(MapToCertificateVm);
+        return items.Select(MapToCertificate);
     }
 
     public async Task<ErrorOr<Created>> CreateAsync(CertificateRequest request,
@@ -51,7 +50,7 @@ public class CertificateService(SailContext context) : ICertificateService
         return Result.Deleted;
     }
 
-    public async Task<IEnumerable<SNIVm>> GetSNIsAsync(Guid certificateId,
+    public async Task<IEnumerable<SNIResponse>> GetSNIsAsync(Guid certificateId,
         CancellationToken cancellationToken = default)
     {
         var filter = Builders<Certificate>.Filter.And(Builders<Certificate>.Filter.Where(x => x.Id == certificateId));
@@ -62,7 +61,7 @@ public class CertificateService(SailContext context) : ICertificateService
             return [];
         }
 
-        return certificate.SNIs.Select(MapToSNIVm);
+        return certificate.SNIs?.Select(MapToSNI) ?? [];
     }
 
     public async Task<ErrorOr<Created>> CreateSNIAsync(Guid certificateId, SNIRequest request,
@@ -102,9 +101,9 @@ public class CertificateService(SailContext context) : ICertificateService
         return Result.Deleted;
     }
 
-    private CertificateVm MapToCertificateVm(Certificate certificate)
+    private CertificateResponse MapToCertificate(Certificate certificate)
     {
-        return new CertificateVm
+        return new CertificateResponse
         {
             Id = certificate.Id,
             Cert = certificate.Cert,
@@ -114,9 +113,9 @@ public class CertificateService(SailContext context) : ICertificateService
         };
     }
 
-    private SNIVm MapToSNIVm(SNI sni)
+    private SNIResponse MapToSNI(SNI sni)
     {
-        return new SNIVm
+        return new SNIResponse
         {
             Id = sni.Id,
             Name = sni.Name,
@@ -125,22 +124,4 @@ public class CertificateService(SailContext context) : ICertificateService
             UpdatedAt = sni.UpdatedAt
         };
     }
-}
-
-public record CertificateVm
-{
-    public Guid Id { get; init; }
-    public string Cert { get; init; }
-    public string Key { get; init; }
-    public DateTimeOffset CreatedAt { get; init; }
-    public DateTimeOffset UpdatedAt { get; init; }
-}
-
-public record SNIVm
-{
-    public Guid Id { get; init; }
-    public string Name { get; init; }
-    public string HostName { get; init; }
-    public DateTimeOffset CreatedAt { get; init; }
-    public DateTimeOffset UpdatedAt { get; init; }
 }

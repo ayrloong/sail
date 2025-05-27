@@ -1,23 +1,66 @@
 using ErrorOr;
-using Sail.Apis;
 using Sail.Core.Entities;
 using MongoDB.Driver;
+using Sail.Models.Clusters;
 using Sail.Storage.MongoDB;
 
 namespace Sail.Services;
 
-public class ClusterService(SailContext context) : IClusterService
+public class ClusterService(SailContext context)
 {
-    public async Task<IEnumerable<ClusterVm>> GetAsync(CancellationToken cancellationToken = default)
+    
+    public async Task<ClusterResponse> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Cluster>.Filter.Where(x => x.Id == id);
+        var routes = await context.Clusters.FindAsync(filter, cancellationToken: cancellationToken);
+        var result = await routes.SingleOrDefaultAsync(cancellationToken: cancellationToken);
+        return MapToCluster(result);
+    }
+    
+    public async Task<IEnumerable<ClusterResponse>> ListAsync(string keywords,
+        CancellationToken cancellationToken = default)
     {
         var filter = Builders<Cluster>.Filter.Empty;
         var routes = await context.Clusters.FindAsync(filter, cancellationToken: cancellationToken);
         var items = await routes.ToListAsync(cancellationToken: cancellationToken);
-
-        return items.Select(MapToClusterVm);
+        return items.Select(MapToCluster);
     }
 
-    public async Task<ErrorOr<Created>> CreateAsync(ClusterRequest request,CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<Created>> CreateAsync(ClusterRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var cluster = CreateClusterFromRequest(request);
+        await context.Clusters.InsertOneAsync(cluster, cancellationToken: cancellationToken);
+        return Result.Created;
+    }
+
+    public async Task<ErrorOr<Updated>> UpdateAsync(Guid id, ClusterRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Cluster>.Filter.And(Builders<Cluster>.Filter.Where(x => x.Id == id));
+
+        var update = Builders<Cluster>.Update
+            .Set(x => x.Name, request.Name)
+            .Set(x => x.ServiceName, request.ServiceName)
+            .Set(x => x.ServiceDiscoveryType, request.ServiceDiscoveryType)
+            .Set(x => x.LoadBalancingPolicy, request.LoadBalancingPolicy)
+            .Set(x => x.Destinations, request.Destinations.Select(CreateDestinationFromRequest).ToList())
+            .Set(x => x.HealthCheck, CreateHealthCheckFromRequest(request.HealthCheck))
+            .Set(x => x.SessionAffinity, CreateSessionAffinityFromRequest(request.SessionAffinity))
+            .Set(x => x.UpdatedAt, DateTimeOffset.UtcNow);
+
+        await context.Clusters.FindOneAndUpdateAsync(filter, update, cancellationToken: cancellationToken);
+        return Result.Updated;
+    }
+
+    public async Task<ErrorOr<Deleted>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Cluster>.Filter.And(Builders<Cluster>.Filter.Where(x => x.Id == id));
+        await context.Clusters.DeleteOneAsync(filter, cancellationToken);
+        return Result.Deleted;
+    }
+
+    private Cluster CreateClusterFromRequest(ClusterRequest request)
     {
         var cluster = new Cluster
         {
@@ -25,48 +68,118 @@ public class ClusterService(SailContext context) : IClusterService
             LoadBalancingPolicy = request.LoadBalancingPolicy,
             ServiceName = request.ServiceName,
             ServiceDiscoveryType = request.ServiceDiscoveryType,
-            Destinations = request.Destinations.Select(item => new Destination
-            {
-                Host = item.Host,
-                Address = item.Address,
-                Health = item.Health
-            }).ToList()
+            HealthCheck = CreateHealthCheckFromRequest(request.HealthCheck),
+            SessionAffinity = CreateSessionAffinityFromRequest(request.SessionAffinity),
+            Destinations = request.Destinations.Select(CreateDestinationFromRequest).ToList()
         };
-        await context.Clusters.InsertOneAsync(cluster, cancellationToken: cancellationToken);
-        return Result.Created;
+        return cluster;
     }
 
-    public async Task<ErrorOr<Updated>> UpdateAsync(Guid id, ClusterRequest request,CancellationToken cancellationToken = default)
+    private HealthCheck CreateHealthCheckFromRequest(HealthCheckRequest? healthCheck)
     {
-        var filter = Builders<Cluster>.Filter.And(Builders<Cluster>.Filter.Where(x => x.Id == id));
-        
-        var update = Builders<Cluster>.Update
-            .Set(x => x.Name,request.Name)
-            .Set(x => x.LoadBalancingPolicy, request.LoadBalancingPolicy)
-            .Set(x => x.UpdatedAt, DateTimeOffset.UtcNow);
-
-        await context.Clusters.FindOneAndUpdateAsync(filter, update, cancellationToken: cancellationToken);
-        return Result.Updated;
+        return new HealthCheck
+        {
+            AvailableDestinationsPolicy = healthCheck?.AvailableDestinationsPolicy,
+            Active = new ActiveHealthCheck
+            {
+                Enabled = healthCheck?.Active?.Enabled,
+                Interval = healthCheck?.Active?.Interval,
+                Timeout = healthCheck?.Active?.Timeout,
+                Policy = healthCheck?.Active?.Policy,
+                Path = healthCheck?.Active?.Path,
+                Query = healthCheck?.Active?.Query
+            },
+            Passive = new PassiveHealthCheck
+            {
+                Enabled = healthCheck?.Passive?.Enabled,
+                Policy = healthCheck?.Passive?.Policy,
+                ReactivationPeriod = healthCheck?.Passive?.ReactivationPeriod,
+            }
+        };
     }
 
-    public async Task<ErrorOr<Deleted>> DeleteAsync(Guid id,CancellationToken cancellationToken = default)
+    private SessionAffinity CreateSessionAffinityFromRequest(SessionAffinityRequest? sessionAffinity)
     {
-        var filter = Builders<Cluster>.Filter.And(Builders<Cluster>.Filter.Where(x => x.Id == id));
-        await context.Clusters.DeleteOneAsync(filter, cancellationToken);
-        return Result.Deleted;
+        return new SessionAffinity
+        {
+            Enabled = sessionAffinity?.Enabled,
+            Policy = sessionAffinity?.Policy,
+            FailurePolicy = sessionAffinity?.FailurePolicy,
+            AffinityKeyName = sessionAffinity?.AffinityKeyName,
+            Cookie = new SessionAffinityCookie
+            {
+                Path = sessionAffinity?.Cookie?.Path,
+                Domain = sessionAffinity?.Cookie?.Domain,
+                HttpOnly = sessionAffinity?.Cookie?.HttpOnly,
+                SecurePolicy = sessionAffinity?.Cookie?.SecurePolicy,
+                SameSite = sessionAffinity?.Cookie?.SameSite,
+                Expiration = sessionAffinity?.Cookie?.Expiration,
+                MaxAge = sessionAffinity?.Cookie?.MaxAge,
+                IsEssential = sessionAffinity?.Cookie?.IsEssential
+            }
+        };
     }
 
-    private ClusterVm MapToClusterVm(Cluster cluster)
+    private Destination CreateDestinationFromRequest(DestinationRequest request)
     {
-        return new ClusterVm
+        return new Destination
+        {
+            Id = Guid.NewGuid(),
+            Host = request.Host,
+            Address = request.Address,
+            Health = request.Health
+        };
+    }
+
+    private ClusterResponse MapToCluster(Cluster cluster)
+    {
+        return new ClusterResponse
         {
             Id = cluster.Id,
             Name = cluster.Name,
             ServiceName = cluster.ServiceName,
             ServiceDiscoveryType = cluster.ServiceDiscoveryType,
             LoadBalancingPolicy = cluster.LoadBalancingPolicy,
-            Destinations = cluster.Destinations?.Select(d => new DestinationVm
+            HealthCheck = new HealthCheckResponse
             {
+                AvailableDestinationsPolicy = cluster.HealthCheck?.AvailableDestinationsPolicy,
+                Active = new ActiveHealthCheckResponse
+                {
+                    Enabled = cluster.HealthCheck?.Active?.Enabled,
+                    Interval = cluster.HealthCheck?.Active?.Interval,
+                    Timeout = cluster.HealthCheck?.Active?.Timeout,
+                    Policy = cluster.HealthCheck?.Active?.Policy,
+                    Path = cluster.HealthCheck?.Active?.Path,
+                    Query = cluster.HealthCheck?.Active?.Query
+                },
+                Passive = new PassiveHealthCheckResponse
+                {
+                    Enabled = cluster.HealthCheck?.Passive?.Enabled,
+                    Policy = cluster.HealthCheck?.Passive?.Policy,
+                    ReactivationPeriod = cluster.HealthCheck?.Passive?.ReactivationPeriod,
+                }
+            },
+            SessionAffinity = new SessionAffinityResponse
+            {
+                Enabled = cluster.SessionAffinity?.Enabled,
+                Policy = cluster.SessionAffinity?.Policy,
+                FailurePolicy = cluster.SessionAffinity?.FailurePolicy,
+                AffinityKeyName =cluster.SessionAffinity?.AffinityKeyName,
+                Cookie = new SessionAffinityCookieResponse
+                {
+                    Path = cluster.SessionAffinity?.Cookie?.Path,
+                    Domain = cluster.SessionAffinity?.Cookie?.Domain,
+                    HttpOnly = cluster.SessionAffinity?.Cookie?.HttpOnly,
+                    SecurePolicy = cluster.SessionAffinity?.Cookie?.SecurePolicy,
+                    SameSite = cluster.SessionAffinity?.Cookie?.SameSite,
+                    Expiration = cluster.SessionAffinity?.Cookie?.Expiration,
+                    MaxAge = cluster.SessionAffinity?.Cookie?.MaxAge,
+                    IsEssential = cluster.SessionAffinity?.Cookie?.IsEssential
+                }
+            },
+            Destinations = cluster.Destinations?.Select(d => new DestinationResponse
+            {
+                Id = d.Id,
                 Host = d.Host,
                 Address = d.Address,
                 Health = d.Health
@@ -75,23 +188,4 @@ public class ClusterService(SailContext context) : IClusterService
             UpdatedAt = cluster.UpdatedAt
         };
     }
-}
-
-public record ClusterVm
-{
-    public Guid Id { get; init; }
-    public string? Name { get; init; }
-    public string? ServiceName { get; set; }
-    public string? ServiceDiscoveryType { get; set; }
-    public string? LoadBalancingPolicy { get; init; }
-    public IEnumerable<DestinationVm>? Destinations { get; init; }
-    public DateTimeOffset CreatedAt { get; init; }
-    public DateTimeOffset UpdatedAt { get; init; }
-}
-
-public record DestinationVm
-{
-    public string? Address { get; init; }
-    public string? Health { get; init; }
-    public string? Host { get; init; }
 }

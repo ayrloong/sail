@@ -8,7 +8,6 @@
     
     <ItemGroup>
         <PackageReference Include="ErrorOr" />
-        <PackageReference Include="FluentValidation" />
         <PackageReference Include="Asp.Versioning.Http"/>
         <PackageReference Include="Grpc.AspNetCore" />
     </ItemGroup>

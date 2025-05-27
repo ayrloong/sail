@@ -13,6 +13,7 @@ public class Route
     public string? TimeoutPolicy { get; set; }
     public TimeSpan? Timeout { get; set; }
     public long? MaxRequestBodySize { get; set; }
+    public IReadOnlyList<IReadOnlyDictionary<string, string>>? Transforms { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
