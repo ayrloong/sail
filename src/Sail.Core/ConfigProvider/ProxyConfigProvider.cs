@@ -8,7 +8,6 @@ namespace Sail.Core.ConfigProvider;
 public class ProxyConfigProvider: IProxyConfigProvider, IUpdateConfig
 {
     private volatile MessageConfig _config = new([], []);
-    private CancellationTokenSource? _cts;
     public IProxyConfig GetConfig() => _config;
 
     public  Task UpdateAsync(IReadOnlyList<RouteConfig> routes, IReadOnlyList<ClusterConfig> clusters,
@@ -30,7 +29,7 @@ public class ProxyConfigProvider: IProxyConfigProvider, IUpdateConfig
         {
         }
 
-        public MessageConfig(IReadOnlyList<RouteConfig> routes, IReadOnlyList<ClusterConfig> clusters,
+        private MessageConfig(IReadOnlyList<RouteConfig> routes, IReadOnlyList<ClusterConfig> clusters,
             string revisionId)
         {
             RevisionId = revisionId ?? throw new ArgumentNullException(nameof(revisionId));
